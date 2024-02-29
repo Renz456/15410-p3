@@ -1,0 +1,1 @@
+void gettid_wrapper(void);

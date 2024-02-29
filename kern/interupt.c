@@ -10,31 +10,23 @@
 
 #include <stdint.h>
 #include <fault_asm_wrappers.h>
+#include <gettid_wrapper.h>
 #include <interupt_internal.h>
+#include <spec/syscall_int.h>
+#include <interupt.h>
 #include <seg.h>
 
 #define TRAP_GATE_CONFIG 0x0F // 0D111 where D is set to 1 for 32 bit gates
 #define SEGMENT_PRESENT 1 << 7
 #define KERNEL_DPL 0 << 5
+#define USER_DPL 3 << 5
 #define OFFSET_SIZE 16 // Offset size (in bits) in intel trap gate
 
-/**
- * @brief Create a idt entry object
- *
- * @param handler
- * @param dpl
- * @param table_index
- */
-void create_idt_entry(void *handler, uint8_t dpl, int table_index)
+static void create_idt_entry(void *handler, uint8_t dpl, int table_index);
+
+void install_syscalls()
 {
-    table_entry_t *idt = (table_entry_t *)idt_base();
-    table_entry_t table_entry;
-    table_entry.lsb_offset = (short)(uintptr_t)handler;
-    table_entry.segment_select = SEGSEL_KERNEL_CS; // as per handout
-    table_entry.zero = 0;
-    table_entry.p_dpl_d = SEGMENT_PRESENT | KERNEL_DPL | TRAP_GATE_CONFIG;
-    table_entry.msb_offset = (short)((uintptr_t)handler >> OFFSET_SIZE);
-    idt[table_index] = table_entry;
+    create_idt_entry(gettid_wrapper, USER_DPL, GETTID_INT);
 }
 
 /**
@@ -61,4 +53,23 @@ void install_fault_handlers()
     create_idt_entry(mf_wrapper, KERNEL_DPL, 16);
     create_idt_entry(ac_wrapper, KERNEL_DPL, 17);
     create_idt_entry(mc_wrapper, KERNEL_DPL, 18);
+}
+
+/**
+ * @brief Create a idt entry object
+ *
+ * @param handler
+ * @param dpl
+ * @param table_index
+ */
+static void create_idt_entry(void *handler, uint8_t dpl, int table_index)
+{
+    table_entry_t *idt = (table_entry_t *)idt_base();
+    table_entry_t table_entry;
+    table_entry.lsb_offset = (short)(uintptr_t)handler;
+    table_entry.segment_select = SEGSEL_KERNEL_CS; // as per handout
+    table_entry.zero = 0;
+    table_entry.p_dpl_d = SEGMENT_PRESENT | dpl | TRAP_GATE_CONFIG;
+    table_entry.msb_offset = (short)((uintptr_t)handler >> OFFSET_SIZE);
+    idt[table_index] = table_entry; // TODO: check the alignment in case smth goes wrong
 }

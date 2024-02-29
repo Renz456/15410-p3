@@ -13,18 +13,20 @@
 
 /* libc includes. */
 #include <stdio.h>
-#include <simics.h>                 /* lprintf() */
+#include <simics.h> /* lprintf() */
 
 /* multiboot header file */
-#include <multiboot.h>              /* boot_info */
+#include <multiboot.h> /* boot_info */
 
 /* x86 specific includes */
-#include <x86/asm.h>                /* enable_interrupts() */
+#include <x86/asm.h> /* enable_interrupts() */
+
+#include <interupt.h>
 
 volatile static int __kernel_all_done = 0;
 
 /** @brief Kernel entrypoint.
- *  
+ *
  *  This is the entrypoint for the kernel.
  *
  * @return Does not return
@@ -37,15 +39,18 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     (void)argv;
     (void)envp;
 
+    install_fault_handlers();
+    install_syscalls();
     /*
      * When kernel_main() begins, interrupts are DISABLED.
      * You should delete this comment, and enable them --
      * when you are ready.
      */
 
-    lprintf( "Hello from a brand new kernel!" );
+    lprintf("Hello from a brand new kernel!");
 
-    while (!__kernel_all_done) {
+    while (!__kernel_all_done)
+    {
         continue;
     }
 

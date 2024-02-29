@@ -12,6 +12,6 @@
 
 void fault_handler(int fault)
 {
-    lprintf("Fault of type %d occurred !!! :(", fault);
+    lprintf("Fault of type %d occurred !!! :(\n", fault);
     MAGIC_BREAK;
 }
