@@ -127,7 +127,7 @@ STUDENTTESTS =
 # A list of the data files you want built in from the user/files
 # directory.
 #
-STUDENTFILES =
+STUDENTFILES = fault_asm_wrappers.o handler.o interupt.o 
 
 ###########################################################################
 # Object files for your thread library
