@@ -24,6 +24,9 @@
 #include <interupt.h>
 #include <thread.h>
 #include <task.h>
+#include <inc/loader.h>
+#include <exec2obj.h>
+#include <elf_410.h>
 
 #define STARTING_FILE "idle"
 
@@ -60,7 +63,28 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
 
     lprintf("Hello from a brand new kernel!\n");
 
-    void *eip;
+    int app_index = find_app_index(STARTING_FILE);
+    if (app_index < 0)
+    {
+        lprintf("Invalid starting app!\n");
+        return -1;
+    }
+
+    if (init_address_space(STARTING_FILE) < 0)
+    {
+        lprintf("Starting app address space failed!\n");
+        return -1;
+    }
+
+    simple_elf_t se_hdr;
+    if (elf_load_helper(&se_hdr, STARTING_FILE) < 0)
+    {
+        lprintf("this should not happen\n");
+        return -1;
+    }
+
+    void *eip = (void *)se_hdr.e_entry;
+
     run_thread(tcb, stack, eip);
     while (!__kernel_all_done)
     {

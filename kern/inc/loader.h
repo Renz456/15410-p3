@@ -8,11 +8,12 @@
 
 #ifndef _LOADER_H
 #define _LOADER_H
-     
 
 /* --- Prototypes --- */
 
-int getbytes( const char *filename, int offset, int size, char *buf );
+int getbytes(const char *filename, int offset, int size, char *buf);
+int find_app_index(const char *filename);
+int init_address_space(const char *filename);
 
 /*
  * Declare your loader prototypes here.

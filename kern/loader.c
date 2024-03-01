@@ -3,9 +3,9 @@
  * @name loader.c
  *
  * Functions for the loading
- * of user programs from binary 
+ * of user programs from binary
  * files should be written in
- * this file. The function 
+ * this file. The function
  * elf_load_helper() is provided
  * for your use.
  */
@@ -19,9 +19,17 @@
 #include <loader.h>
 #include <elf_410.h>
 
+/* --- Local function prototypes --- */
 
-/* --- Local function prototypes --- */ 
-
+int find_app_index(const char *filename)
+{
+  for (int i = 0; i < MAX_NUM_APP_ENTRIES; i++)
+  {
+    if (strcmp(exec2obj_userapp_TOC[i].execname, filename) == 0)
+      return i;
+  }
+  return -1;
+}
 
 /**
  * Copies data from a file into a buffer.
@@ -33,18 +41,58 @@
  *
  * @return returns the number of bytes copied on succes; -1 on failure
  */
-int getbytes( const char *filename, int offset, int size, char *buf )
+int getbytes(const char *filename, int offset, int size, char *buf)
 {
-    // placate compiler
-    (void)filename;
-    (void)offset;
-    (void)size;
-    (void)buf;
-    /*
-     * You fill in this function.
-     */
+  int app_index = find_app_index(filename);
+  if (app_index == -1)
+  {
+    return -1;
+  }
 
-  return -1;
+  memcpy(buf, exec2obj_userapp_TOC[app_index].execbytes + offset, size);
+  return size;
 }
 
 /*@}*/
+
+int init_address_space(const char *filename)
+{
+  if (elf_check_header(filename) != ELF_SUCCESS)
+  {
+    lprintf("Invalid file name!\n");
+    return -1;
+  }
+
+  simple_elf_t se_hdr;
+  if (elf_load_helper(&se_hdr, filename) != ELF_SUCCESS)
+  {
+    lprintf("Failed to load elf file!\n");
+    return -1;
+  }
+
+  int check_align;
+  check_align = align_pages((void *)se_hdr.e_txtstart, se_hdr.e_txtlen);
+  if (check_align < 0)
+    lprintf("App text pages failed!!\n");
+  getbytes(se_hdr.e_fname, se_hdr.e_txtoff, se_hdr.e_txtlen, (char *)se_hdr.e_txtstart);
+
+  check_align = align_pages((void *)se_hdr.e_datstart, se_hdr.e_datlen);
+  if (check_align < 0)
+    lprintf("App data pages failed!!\n");
+  getbytes(se_hdr.e_fname, se_hdr.e_datoff, se_hdr.e_datlen, (char *)se_hdr.e_txtstart);
+
+  check_align = align_pages((void *)se_hdr.e_rodatstart, se_hdr.e_rodatlen);
+  if (check_align < 0)
+    lprintf("App rodata pages failed!!\n");
+  getbytes(se_hdr.e_fname, se_hdr.e_rodatoff, se_hdr.e_rodatlen, (char *)se_hdr.e_txtstart);
+
+  check_align = align_pages((void *)se_hdr.e_bssstart, se_hdr.e_bsslen);
+  if (check_align < 0)
+    lprintf("App bss pages failed!!\n");
+
+  // bss does not seem to have an offset
+  // getbytes(se_hdr.e_fname, 0, se_hdr.e_bsslen, (char *)se_hdr.e_txtstart);
+  memset((void *)se_hdr.e_bssstart, 0, se_hdr.e_bsslen);
+
+  return 0;
+}
