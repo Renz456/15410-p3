@@ -8,6 +8,9 @@
  *
  */
 
+#ifndef _FAULT_ASM_WRAP_H
+#define _FAULT_ASM_WRAP_H
+#include <handler.h>
 void de_wrapper(void);
 void db_wrapper(void);
 void nmi_wrapper(void);
@@ -26,3 +29,5 @@ void pf_wrapper(void);
 void mf_wrapper(void);
 void ac_wrapper(void);
 void mc_wrapper(void);
+
+#endif /* _FAULT_ASM_WRAP_H */

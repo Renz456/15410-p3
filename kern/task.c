@@ -9,6 +9,7 @@
 
 #include <inc/task.h>
 #include <inc/kern_constants.h>
+#include <malloc.h>
 
 #define TASK_PAGE_SIZE PAGE_SIZE
 
@@ -29,8 +30,8 @@ pcb_t *create_pcb(void *page_directory)
  */
 void *init_task(pcb_t *pcb)
 {
-    void *stack_low = (void *)((USR_END & PAGE_MASK) - TASK_PAGE_SIZE);
-    void *stack_high = (void *)(USR_END & PAGE_MASK);
+    void *stack_low = (void *)((USER_MEM_START & PAGE_MASK) - TASK_PAGE_SIZE);
+    void *stack_high = (void *)(USER_MEM_START & PAGE_MASK);
 
     if (new_pages(stack_low, TASK_PAGE_SIZE) < 0)
         return NULL;

@@ -9,14 +9,15 @@
  */
 
 #include <seg.h>
+; #include <inc/gettid_wrapper.h>
 
 
 .global gettid_wrapper
 
 gettid_wrapper:
     pushl %ebp
-    mov   %esp, ebp     
-    sub   $4, esp       /* Make space for return value */
+    mov   %esp, %ebp     
+    sub   $4, %esp       /* Make space for return value */
 
     pusha
     pushl %ds           /* Code segments are saved automatically*/
@@ -32,7 +33,7 @@ gettid_wrapper:
 
     call kernel_gettid
 
-    mov  eax, -4(ebp)  
+    mov  %eax,-4(%ebp)  
 
     popl %gs
     popl %fs 
@@ -40,6 +41,6 @@ gettid_wrapper:
     popl %ds
     popa
 
-    popl eax
-    popl ebp
+    popl %eax
+    popl %ebp
     iret 

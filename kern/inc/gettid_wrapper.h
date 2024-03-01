@@ -8,8 +8,13 @@
  *
  */
 
+#ifndef _GETTID_WRAP_H
+#define _GETTID_WRAP_H
+
 /**
  * @brief Get the tid wrapper object
  *
  */
 void gettid_wrapper(void);
+
+#endif /* _GETTID_WRAP_H */

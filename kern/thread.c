@@ -12,7 +12,10 @@
 #include <inc/asm_helpers.h>
 #include <inc/kern_constants.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <seg.h>
+#include <x86/cr.h>
+#include <x86/eflags.h>
 
 /**
  * @brief Create a tcb object
@@ -33,8 +36,8 @@ tcb_t *create_tcb(pcb_t *pcb)
     if (!tcb)
         return NULL;
 
-    kernel_stack_high = kernel_stack + KERNEL_PAGE_SIZE;
-    kernel_stack_high - WORD_SIZE = (void *)tcb; // set tcb to the top of kernel stack
+    void *kernel_stack_high = kernel_stack + KERNEL_PAGE_SIZE;
+    *((void **)(kernel_stack_high - WORD_SIZE)) = (void *)tcb; // set tcb to the top of kernel stack
 
     tcb->tid = pcb->num_threads++;
     tcb->kernel_stack = kernel_stack_high - WORD_SIZE;
@@ -57,18 +60,18 @@ tcb_t *create_tcb(pcb_t *pcb)
 tcb_t *get_tcb()
 {
     void *stack = get_esp();
-    void *stack_bottom = (uintptr_t)stack & KERNEL_PAGE_MASK;
+    void *stack_bottom = (void *)((uintptr_t)stack & KERNEL_PAGE_MASK);
     tcb_t **tcb_ptr = (tcb_t **)(stack_bottom + KERNEL_PAGE_SIZE - WORD_SIZE);
     return *tcb_ptr;
 }
 
-usr_state_t set_user_state(tcb_t *tcb, void *stack_base, void *entry_instruciton)
+usr_state_t set_user_state(tcb_t *tcb, void *stack_base, void *entry_instruction)
 {
-    user_state_t user_state = {
-        .eip = entry_instruciton,
+    usr_state_t user_state = {
+        .eip = (uint32_t)entry_instruction,
         .cs = SEGSEL_USER_CS,
         .eflags = get_eflags(),
-        .esp = stack_base,
+        .esp = (uint32_t)stack_base,
         .ss = SEGSEL_USER_DS,
     };
 
@@ -79,9 +82,8 @@ void run_thread(tcb_t *tcb, void *stack_base, void *entry_instruciton)
 {
     // what needs to be here lol
     // mark pointer to kernel stack for future interupts
-    set_esp0(tcb->kernel_stack);
+    set_esp0((uint32_t)tcb->kernel_stack);
 
-    unsigned int eflags = get_eflags();
     usr_state_t user_state = set_user_state(tcb, stack_base, entry_instruciton);
     exec_user(user_state);
 }

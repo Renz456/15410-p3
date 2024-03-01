@@ -18,6 +18,8 @@
 #include <exec2obj.h>
 #include <loader.h>
 #include <elf_410.h>
+#include <simics.h>
+#include <inc/vm.h>
 
 /* --- Local function prototypes --- */
 

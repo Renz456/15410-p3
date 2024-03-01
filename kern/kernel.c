@@ -55,7 +55,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
      */
 
     // init pcb?
-    void *page_directory;
+    void *page_directory = (void *)0x1234;
     pcb_t *pcb = create_pcb(page_directory);
     void *stack = init_task(pcb);
     // void *esp;

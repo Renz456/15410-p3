@@ -8,7 +8,8 @@
  * 
  */
 
-#include <handler.h>
+; #include <handler.h>
+; #include <inc/fault_asm_wrappers.h>
 
 .global de_wrapper
 .global db_wrapper

@@ -8,6 +8,9 @@
  *
  */
 
+#ifndef _THREAD_KERN_H
+#define _THREAD_KERN_H
+
 #include <task.h>
 #include <stdint.h>
 
@@ -33,3 +36,9 @@ typedef struct usr_state
     uint32_t esp;
     uint32_t ss;
 } usr_state_t;
+
+void run_thread(tcb_t *tcb, void *stack_base, void *entry_instruction);
+tcb_t *get_tcb();
+tcb_t *create_tcb(pcb_t *pcb);
+
+#endif /* _THREAD_KERN_H */

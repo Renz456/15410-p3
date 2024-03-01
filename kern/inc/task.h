@@ -8,6 +8,9 @@
  *
  */
 
+#ifndef _TASK_H
+#define _TASK_H
+
 typedef struct pcb
 {
     int pid;
@@ -26,4 +29,6 @@ typedef struct entry_args
 } crt0_main_t;
 
 pcb_t *create_pcb(void *page_directory);
-void
+void *init_task(pcb_t *pcb);
+
+#endif /* _TASK_H */

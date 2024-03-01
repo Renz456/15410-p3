@@ -127,7 +127,7 @@ STUDENTTESTS =
 # A list of the data files you want built in from the user/files
 # directory.
 #
-STUDENTFILES = fault_asm_wrappers.o handler.o interupt.o 
+STUDENTFILES = 
 
 ###########################################################################
 # Object files for your thread library
@@ -162,7 +162,8 @@ AUTOSTACK_OBJS = autostack.o
 #
 # Kernel object files you provide in from kern/
 #
-KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o
+KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o fault_asm_wrappers.o interupt.o asm_helpers.o task.o gettid_wrapper.o handler.o thread.o virtual_mem.o 
+
 
 ###########################################################################
 # WARNING: Do not put **test** programs into the REQPROGS variables.  Your

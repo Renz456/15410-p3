@@ -12,9 +12,10 @@
 #include <fault_asm_wrappers.h>
 #include <gettid_wrapper.h>
 #include <interupt_internal.h>
-#include <spec/syscall_int.h>
+#include <syscall_int.h>
 #include <interupt.h>
 #include <seg.h>
+#include <x86/asm.h>
 
 #define TRAP_GATE_CONFIG 0x0F // 0D111 where D is set to 1 for 32 bit gates
 #define SEGMENT_PRESENT 1 << 7
