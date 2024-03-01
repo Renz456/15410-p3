@@ -30,7 +30,7 @@
 #include <inc/vm.h>
 #include <x86/cr.h>
 
-#define STARTING_FILE "idle"
+#define STARTING_FILE "getpid_test1"
 
 volatile static int __kernel_all_done = 0;
 
@@ -49,8 +49,11 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     (void)envp;
 
     install_fault_handlers();
+    lprintf("Installed fault handlers!\n");
     install_syscalls();
+    lprintf("Installed Sycalls!\n");
     initialize_vm();
+    lprintf("Installed VM!\n");
     /*
      * When kernel_main() begins, interrupts are DISABLED.
      * You should delete this comment, and enable them --

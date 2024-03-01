@@ -15,8 +15,9 @@
 #include <stdint.h>
 #include <string.h>
 #include <common_kern.h>
-#include <cr.h>
+#include <x86/cr.h>
 #include <inc/kern_constants.h>
+#include <simics.h>
 
 #define TEN_BIT_MASK 0xFFFFF
 #define MSB_SET_MASK 0x80000000
@@ -81,7 +82,8 @@ void initialize_vm()
     memset(pd_start, 0, PAGE_SIZE);
     map_kernel_space(pd_start);
     set_cr3((unsigned int)pd_start);
-    set_cr0(get_cr0() | MSB_SET_MASK);
+    MAGIC_BREAK;
+    // set_cr0(get_cr0() | CR0_PE | CR0_PG);
 }
 
 void *get_frame_addr()
@@ -129,11 +131,12 @@ int new_pages(void *addr, int len)
 
 int align_pages(void *addr, int size)
 {
+    assert(addr);
     unsigned int addr_aligned = (unsigned int)addr & PAGE_MASK;
     int size_aligned = size;
 
     if (size_aligned % PAGE_SIZE != 0)
-        size_aligned = size_aligned / PAGE_SIZE + PAGE_SIZE;
-
+        size_aligned = (size_aligned / PAGE_SIZE) * PAGE_SIZE + PAGE_SIZE;
+    lprintf("aligned pages %x init addr %p\n", addr_aligned, addr);
     return new_pages((void *)addr_aligned, size_aligned);
 }
