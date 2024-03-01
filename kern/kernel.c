@@ -4,8 +4,8 @@
  *  You should initialize things in kernel_main(),
  *  and then run stuff.
  *
- *  @author Harry Q. Bovik (hqbovik)
- *  @author Fred Hacker (fhacker)
+ *  @author Rene Ravanan (rravanan)
+ *          Abhinav Gupta (abhinav6)
  *  @bug No known bugs.
  */
 
@@ -22,6 +22,10 @@
 #include <x86/asm.h> /* enable_interrupts() */
 
 #include <interupt.h>
+#include <thread.h>
+#include <task.h>
+
+#define STARTING_FILE "idle"
 
 volatile static int __kernel_all_done = 0;
 
@@ -47,8 +51,17 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
      * when you are ready.
      */
 
-    lprintf("Hello from a brand new kernel!");
+    // init pcb?
+    void *page_directory;
+    pcb_t *pcb = create_pcb(page_directory);
+    void *stack = init_task(pcb);
+    // void *esp;
+    tcb_t *tcb = create_tcb(pcb);
 
+    lprintf("Hello from a brand new kernel!\n");
+
+    void *eip;
+    run_thread(tcb, stack, eip);
     while (!__kernel_all_done)
     {
         continue;
