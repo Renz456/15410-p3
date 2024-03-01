@@ -27,6 +27,8 @@
 #include <inc/loader.h>
 #include <exec2obj.h>
 #include <elf_410.h>
+#include <inc/vm.h>
+#include <x86/cr.h>
 
 #define STARTING_FILE "idle"
 
@@ -48,6 +50,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
 
     install_fault_handlers();
     install_syscalls();
+    initialize_vm();
     /*
      * When kernel_main() begins, interrupts are DISABLED.
      * You should delete this comment, and enable them --
@@ -55,7 +58,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
      */
 
     // init pcb?
-    void *page_directory = (void *)0x1234;
+    void *page_directory = (void *)get_cr3();
     pcb_t *pcb = create_pcb(page_directory);
     void *stack = init_task(pcb);
     // void *esp;

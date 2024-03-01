@@ -30,8 +30,8 @@ pcb_t *create_pcb(void *page_directory)
  */
 void *init_task(pcb_t *pcb)
 {
-    void *stack_low = (void *)((USER_MEM_START & PAGE_MASK) - TASK_PAGE_SIZE);
-    void *stack_high = (void *)(USER_MEM_START & PAGE_MASK);
+    void *stack_low = (void *)((USER_MEM_END & PAGE_MASK) - TASK_PAGE_SIZE);
+    void *stack_high = (void *)(USER_MEM_END & PAGE_MASK);
 
     if (new_pages(stack_low, TASK_PAGE_SIZE) < 0)
         return NULL;
