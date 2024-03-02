@@ -10,6 +10,8 @@
 #include <inc/task.h>
 #include <inc/kern_constants.h>
 #include <malloc.h>
+#include <assert.h>
+#include <simics.h>
 
 #define TASK_PAGE_SIZE PAGE_SIZE
 
@@ -18,7 +20,9 @@ static void *setup_main(void *stack_high, void *stack_low);
 pcb_t *create_pcb(void *page_directory)
 {
     pcb_t *pcb = malloc(sizeof(pcb_t));
+    assert(pcb);
     pcb->page_directory = page_directory;
+    pcb->num_threads = 0;
     return pcb;
 }
 
@@ -36,6 +40,7 @@ void *init_task(pcb_t *pcb)
     if (new_pages(stack_low, TASK_PAGE_SIZE) < 0)
         return NULL;
 
+    lprintf("check start %p end %p stacks for procss\n", stack_high, stack_low);
     return setup_main(stack_high, stack_low);
 }
 
@@ -54,5 +59,5 @@ static void *setup_main(void *stack_high, void *stack_low)
     args->stack_high = stack_high;
     args->stack_low = stack_low;
 
-    return stack_high - sizeof(crt0_main_t) - WORD_SIZE;
+    return stack_high - sizeof(crt0_main_t) - PTR_SIZE;
 }

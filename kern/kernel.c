@@ -30,7 +30,7 @@
 #include <inc/vm.h>
 #include <x86/cr.h>
 
-#define STARTING_FILE "getpid_test1"
+#define STARTING_FILE "ck1"
 
 volatile static int __kernel_all_done = 0;
 
@@ -65,6 +65,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     pcb_t *pcb = create_pcb(page_directory);
     void *stack = init_task(pcb);
     // void *esp;
+    lprintf("process actual start stack %p\n", stack);
     tcb_t *tcb = create_tcb(pcb);
 
     lprintf("Hello from a brand new kernel!\n");
@@ -92,6 +93,8 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     void *eip = (void *)se_hdr.e_entry;
 
     run_thread(tcb, stack, eip);
+
+    lprintf("starting while loop\n");
     while (!__kernel_all_done)
     {
         continue;

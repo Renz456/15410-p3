@@ -7,8 +7,13 @@
  *  @status done
  */
 
+// #include <simics.h>
+
 int main()
 {
-    while (1) {
+    // lprintf("IN IDLE!\n");
+    // MAGIC_BREAK;
+    while (1)
+    {
     }
 }

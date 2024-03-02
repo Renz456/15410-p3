@@ -33,8 +33,9 @@ exec_user:
     mov %eax, %fs
     mov %eax, %gs
 
-    mov 8(%ebp), %eax
-    pushl %eax                  /* push user state onto stack */
+    movl 8(%ebp), %eax
+    /* pushl %eax */                  /* push user state onto stack */
+    movl %eax,%esp
     iret
 
 

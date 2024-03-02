@@ -78,15 +78,19 @@ int init_address_space(const char *filename)
     lprintf("App text pages failed!!\n");
   getbytes(se_hdr.e_fname, se_hdr.e_txtoff, se_hdr.e_txtlen, (char *)se_hdr.e_txtstart);
 
-  check_align = align_pages((void *)se_hdr.e_datstart, se_hdr.e_datlen);
+  if ((void *)se_hdr.e_datstart)
+    check_align = align_pages((void *)se_hdr.e_datstart, se_hdr.e_datlen);
   if (check_align < 0)
     lprintf("App data pages failed!!\n");
-  getbytes(se_hdr.e_fname, se_hdr.e_datoff, se_hdr.e_datlen, (char *)se_hdr.e_txtstart);
+  if ((void *)se_hdr.e_datstart)
+    getbytes(se_hdr.e_fname, se_hdr.e_datoff, se_hdr.e_datlen, (char *)se_hdr.e_txtstart);
 
-  check_align = align_pages((void *)se_hdr.e_rodatstart, se_hdr.e_rodatlen);
+  if ((void *)se_hdr.e_rodatstart)
+    check_align = align_pages((void *)se_hdr.e_rodatstart, se_hdr.e_rodatlen);
   if (check_align < 0)
     lprintf("App rodata pages failed!!\n");
-  getbytes(se_hdr.e_fname, se_hdr.e_rodatoff, se_hdr.e_rodatlen, (char *)se_hdr.e_txtstart);
+  if ((void *)se_hdr.e_rodatstart)
+    getbytes(se_hdr.e_fname, se_hdr.e_rodatoff, se_hdr.e_rodatlen, (char *)se_hdr.e_txtstart);
 
   check_align = align_pages((void *)se_hdr.e_bssstart, se_hdr.e_bsslen);
   if (check_align < 0)

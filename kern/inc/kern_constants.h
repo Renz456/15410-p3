@@ -16,7 +16,7 @@
 #define PAGE_MASK (~(PAGE_SIZE - 1))
 #define KERNEL_PAGE_SIZE PAGE_SIZE
 #define KERNEL_PAGE_MASK (~(KERNEL_PAGE_SIZE - 1))
-#define WORD_SIZE 4
+#define PTR_SIZE 4
 #define USER_MEM_END 0xFFFFFFFF
 
 #endif /* _KERN_CONSTANTS_H */
