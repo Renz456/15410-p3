@@ -18,7 +18,7 @@
 #include <x86/eflags.h>
 #include <simics.h>
 #include <assert.h>
-
+#include <vm.h>
 /**
  * @brief Create a tcb object
  *

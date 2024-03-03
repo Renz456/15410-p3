@@ -102,23 +102,24 @@ void initialize_vm()
     pde *pd_start = create_new_pd();
     map_kernel_space(pd_start);
     set_cr3((unsigned int)pd_start);
-    set_cr0(get_cr0() | CR0_PG);
+    set_cr0(get_cr0() | CR0_PG | CR0_PE);
 }
 
 void *get_frame_addr()
 {
     void *ret_frame = frame_curr;
     frame_curr += PAGE_SIZE;
-    // if (ret_frame > machine_phys_frames() * PAGE_SIZE)
-    // {
-    //     return NULL;
-    // }
+    if ((unsigned int)ret_frame > machine_phys_frames() * PAGE_SIZE)
+    {
+        return NULL;
+    }
     return ret_frame;
 }
 
 int new_pages(void *addr, int len)
 {
     assert(addr != NULL);
+
     if (len % PAGE_SIZE != 0)
     {
         panic("len is not page alinged");
@@ -145,6 +146,7 @@ int new_pages(void *addr, int len)
         }
         add_frame(start, (unsigned int)frame_addr, (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG);
     }
+    lprintf("added page from %p to %p\n", addr, addr + len);
     return 0;
 }
 

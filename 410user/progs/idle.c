@@ -7,12 +7,16 @@
  *  @status done
  */
 
-// #include <simics.h>
+#include <simics.h>
+#include <syscall.h>
 
 int main()
 {
-    // lprintf("IN IDLE!\n");
-    // MAGIC_BREAK;
+    int x = 1;
+    x += 1;
+    // x = gettid();
+    // lprintf("IN IDLE! %d\n", x);
+    MAGIC_BREAK;
     while (1)
     {
     }

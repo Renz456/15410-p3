@@ -16,6 +16,7 @@
 #include <interupt.h>
 #include <seg.h>
 #include <x86/asm.h>
+#include <vm.h>
 
 #define TRAP_GATE_CONFIG 0x0F // 0D111 where D is set to 1 for 32 bit gates
 #define SEGMENT_PRESENT 1 << 7
@@ -28,6 +29,7 @@ static void create_idt_entry(void *handler, uint8_t dpl, int table_index);
 void install_syscalls()
 {
     create_idt_entry(gettid_wrapper, USER_DPL, GETTID_INT);
+    create_idt_entry(new_pages, USER_DPL, NEW_PAGES_INT);
 }
 
 /**

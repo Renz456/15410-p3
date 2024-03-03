@@ -35,7 +35,13 @@ exec_user:
 
     movl 8(%ebp), %eax
     /* pushl %eax */                  /* push user state onto stack */
-    movl %eax,%esp
+    leal (%eax),%esp
+    /*movl $0xffffefec,%eax
+    movl $0xffffefec,%ebx
+    movl $0xffffefec,%ecx
+    movl $0xffffefec,%edx
+    movl $0xffffefec,%esi
+    movl $0xffffefec,%edi */
     iret
 
 

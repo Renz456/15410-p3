@@ -30,7 +30,7 @@
 #include <inc/vm.h>
 #include <x86/cr.h>
 
-#define STARTING_FILE "ck1"
+#define STARTING_FILE "idle"
 
 volatile static int __kernel_all_done = 0;
 

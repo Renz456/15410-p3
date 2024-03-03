@@ -145,7 +145,7 @@ THREAD_OBJS = malloc.o panic.o
 ###########################################################################
 # Object files for your syscall wrappers
 ###########################################################################
-SYSCALL_OBJS = syscall.o gettid.o
+SYSCALL_OBJS = syscall.o gettid.o new_pages.o
 
 ###########################################################################
 # Object files for your automatic stack handling
@@ -181,7 +181,7 @@ KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o fault_asm_wrapp
 # or init unless you are writing your own, and don't do that unless
 # you have a really good reason to do so.
 #
-410REQPROGS = idle init shell
+410REQPROGS = idle init shell 
 
 ###########################################################################
 # Mandatory programs whose source is provided by you

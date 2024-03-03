@@ -8,19 +8,19 @@
  *  @status done
  */
 
-#include <syscall.h>  /* gettid() */
-#include <simics.h>   /* lprintf() */
+#include <syscall.h> /* gettid() */
+#include <simics.h>	 /* lprintf() */
 
 /* Main */
 int main()
 {
 	int tid;
 
-    sim_ck1();
+	sim_ck1();
 	tid = gettid();
 
 	lprintf("my tid is: %d", tid);
-	
+
 	while (1)
 		continue;
 }
