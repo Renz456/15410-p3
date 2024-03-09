@@ -95,7 +95,7 @@ void run_thread(tcb_t *tcb, void *stack_base, void *entry_instruciton)
     lprintf("cs: %lx\n", user_state.cs);
     lprintf("eip: %lx\n", user_state.eip);
     MAGIC_BREAK;
-    exec_user(&user_state);
+    exec_user(user_state);
 }
 
 /**

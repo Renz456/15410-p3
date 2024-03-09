@@ -30,7 +30,7 @@
 #include <inc/vm.h>
 #include <x86/cr.h>
 
-#define STARTING_FILE "idle"
+#define STARTING_FILE "loader_test2"
 
 volatile static int __kernel_all_done = 0;
 
@@ -91,7 +91,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     }
 
     void *eip = (void *)se_hdr.e_entry;
-
+    lprintf("Entry addr %lx\n", se_hdr.e_entry);
     run_thread(tcb, stack, eip);
 
     lprintf("starting while loop\n");

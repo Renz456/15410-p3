@@ -103,7 +103,7 @@ UPDATE_METHOD = afs
 # A list of the test programs you want compiled in from the 410user/progs
 # directory.
 #
-410TESTS = getpid_test1 ck1
+410TESTS = getpid_test1 ck1 loader_test1 loader_test2
 
 ###########################################################################
 # Test programs you have written which you wish to run

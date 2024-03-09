@@ -33,7 +33,7 @@ exec_user:
     mov %eax, %fs
     mov %eax, %gs
 
-    movl 8(%ebp), %eax
+    leal 8(%ebp), %eax
     /* pushl %eax */                  /* push user state onto stack */
     leal (%eax),%esp
     /*movl $0xffffefec,%eax
