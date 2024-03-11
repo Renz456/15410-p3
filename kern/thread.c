@@ -72,7 +72,7 @@ usr_state_t set_user_state(tcb_t *tcb, void *stack_base, void *entry_instruction
     usr_state_t user_state = {
         .eip = (uint32_t)entry_instruction,
         .cs = SEGSEL_USER_CS,
-        .eflags = get_eflags(),
+        .eflags = get_eflags() | EFL_IF | EFL_RESV1,
         .esp = (uint32_t)stack_base,
         .ss = SEGSEL_USER_DS,
     };

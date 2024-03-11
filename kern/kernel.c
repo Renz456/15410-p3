@@ -30,7 +30,7 @@
 #include <inc/vm.h>
 #include <x86/cr.h>
 
-#define STARTING_FILE "loader_test2"
+#define STARTING_FILE "idle"
 
 volatile static int __kernel_all_done = 0;
 
@@ -52,6 +52,8 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     lprintf("Installed fault handlers!\n");
     install_syscalls();
     lprintf("Installed Sycalls!\n");
+    install_hardware_interrupts();
+    lprintf("Installed Hardware Interupts!\n");
     initialize_vm();
     lprintf("Installed VM!\n");
     /*

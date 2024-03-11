@@ -62,14 +62,9 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *
     if (!check_present((void *)pd_start[pd_idx])) // Checking if the directory is present or not, if not then we create it and set the PD flags
     {
         pde *new_page_table = create_new_pd();
-        lprintf("check addr %x new pt %p\n", new_page_table[get_pt_index((void *)virtual_address)], new_page_table);
+        // lprintf("check addr %x new pt %p\n", new_page_table[get_pt_index((void *)virtual_address)], new_page_table);
         // new_page_table = (pde *)set_flags(new_page_table, pd_flags);
         pd_start[pd_idx] = set_flags(new_page_table, pd_flags);
-        for (int i = 0; i < PAGE_SIZE / 4; i++)
-        {
-            if (new_page_table[i] != 0)
-                lprintf("doodoooo %p %d\n", new_page_table, i);
-        }
     }
     pte *pt_start = (pte *)(pd_start[pd_idx] & CLEAR_BOTTOM);
     int pt_idx = (unsigned int)get_pt_index((void *)virtual_address);
@@ -146,7 +141,7 @@ int new_pages(void *addr, int len)
         }
         add_frame(start, (unsigned int)frame_addr, (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG);
     }
-    lprintf("added page from %p to %p\n", addr, addr + len);
+    // lprintf("added page from %p to %p\n", addr, addr + len);
     return 0;
 }
 

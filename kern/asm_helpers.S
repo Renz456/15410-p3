@@ -44,8 +44,32 @@ exec_user:
     movl $0xffffefec,%edi */
     iret
 
+.global xchg_wrapper
+
+xchg_wrapper:
+    mov 8(%esp), %eax //Loading 2nd arg
+    mov 4(%esp), %ecx //Loading 1st arg
+    xchg (%ecx), %eax //Calling the xchg function
+    ret //Returning from the xchg function
 
 
+/* Wrapper to call the timer interupt handler 
+   after saving callee registers*/
+.global  timer_wrapper
+timer_wrapper:
+    pusha
+    call timer_interupt_handler
+    popa
+    IRET
 
+/* Wrapper to call the keyboard interupt handler 
+   after saving callee registers*/
+
+.global  keyboard_wrapper
+keyboard_wrapper:
+    pusha
+    /* call keyboard_interupt_handler */
+    popa
+    IRET
 
 

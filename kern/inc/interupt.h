@@ -13,5 +13,6 @@
 
 void install_syscalls();
 void install_fault_handlers();
+void install_hardware_interrupts();
 
 #endif /* _INTERUPT_KERN_H */
