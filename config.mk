@@ -103,7 +103,7 @@ UPDATE_METHOD = afs
 # A list of the test programs you want compiled in from the 410user/progs
 # directory.
 #
-410TESTS =
+410TESTS = getpid_test1 ck1 loader_test1 loader_test2
 
 ###########################################################################
 # Test programs you have written which you wish to run
@@ -127,7 +127,7 @@ STUDENTTESTS =
 # A list of the data files you want built in from the user/files
 # directory.
 #
-STUDENTFILES =
+STUDENTFILES = 
 
 ###########################################################################
 # Object files for your thread library
@@ -145,7 +145,7 @@ THREAD_OBJS = malloc.o panic.o
 ###########################################################################
 # Object files for your syscall wrappers
 ###########################################################################
-SYSCALL_OBJS = syscall.o
+SYSCALL_OBJS = syscall.o gettid.o new_pages.o
 
 ###########################################################################
 # Object files for your automatic stack handling
@@ -162,7 +162,10 @@ AUTOSTACK_OBJS = autostack.o
 #
 # Kernel object files you provide in from kern/
 #
-KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o
+KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o fault_asm_wrappers.o \
+			  interupt.o asm_helpers.o task.o gettid_wrapper.o handler.o thread.o \
+			  virtual_mem.o timer.o
+
 
 ###########################################################################
 # WARNING: Do not put **test** programs into the REQPROGS variables.  Your
@@ -180,7 +183,7 @@ KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o
 # or init unless you are writing your own, and don't do that unless
 # you have a really good reason to do so.
 #
-410REQPROGS = idle init shell
+410REQPROGS = idle init shell 
 
 ###########################################################################
 # Mandatory programs whose source is provided by you

@@ -41,11 +41,11 @@ void set_status(int status)
 
 void vanish(void)
 {
-	int blackhole = 867-5309;
+	int blackhole = 867 - 5309;
 
 	blackhole ^= blackhole;
 	blackhole /= blackhole;
-	*(int *) blackhole = blackhole;
+	*(int *)blackhole = blackhole;
 
 	/* won't get here */
 	while (1)
@@ -68,11 +68,6 @@ int deschedule(int *flag)
 }
 
 int make_runnable(int pid)
-{
-	return -1;
-}
-
-int gettid(void)
 {
 	return -1;
 }
@@ -138,10 +133,10 @@ void task_vanish(int status)
 		++placate_the_compiler;
 }
 
-int new_pages(void *addr, int len)
-{
-	return -1;
-}
+// int new_pages(void *addr, int len)
+// {
+// 	return -1;
+// }
 
 int remove_pages(void *addr)
 {
