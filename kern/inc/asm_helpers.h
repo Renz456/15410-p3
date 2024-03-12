@@ -19,5 +19,6 @@ void exec_user(usr_state_t user_state);
 int xchg_wrapper(int *, int);
 void timer_wrapper();
 void keyboard_wrapper();
+void finish_switch(void **old_esp, void *new_esp);
 
 #endif /* _ASM_HELPER_KERN_H */

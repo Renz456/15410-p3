@@ -162,9 +162,9 @@ AUTOSTACK_OBJS = autostack.o
 #
 # Kernel object files you provide in from kern/
 #
-KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o fault_asm_wrappers.o \
-			  interupt.o asm_helpers.o task.o gettid_wrapper.o handler.o thread.o \
-			  virtual_mem.o timer.o
+KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o interrupts/fault_asm_wrappers.o \
+			  interrupts/interupt.o asm_helpers.o task.o gettid_wrapper.o interrupts/handler.o thread.o \
+			  memory/virtual_mem.o hardware/timer.o
 
 
 ###########################################################################

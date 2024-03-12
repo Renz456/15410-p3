@@ -41,7 +41,10 @@ void install_syscalls()
 }
 
 /**
- * @brief TODO: this needs to do something (maybe context switch?)
+ * @brief TODO: this needs to do something
+ *                  - Try context switch
+ *                  - Move stuff from the sleep queue
+ *
  *
  * @param tick
  */

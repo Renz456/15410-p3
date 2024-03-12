@@ -26,6 +26,7 @@ typedef struct tcb
     // registers?
     // process pointer?
     // kernel info?
+    void *esp;
 } tcb_t;
 
 typedef struct usr_state
