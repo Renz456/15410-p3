@@ -44,14 +44,14 @@ exec_user:
     movl $0xffffefec,%edi */
     iret
 
- .global finish_switch
 
+ .global finish_switch
  finish_switch:
     pusha                 /* save general purpose reg of current thread */
     movl   36(%esp), %eax /* load first argument to eax (old esp) */
     movl   %esp, (%eax)   /* save esp in node */
     movl   40(%esp), %eax /* load second arg (new esp) */
-    leal   %eax, %esp     /* set new thread esp */
+    leal   (%eax), %esp     /* set new thread esp */
     popa                  /* restore general registers of new thread */
     ret
 
@@ -66,7 +66,7 @@ xchg_wrapper:
 
 /* Wrapper to call the timer interupt handler 
    after saving callee registers*/
-.global  timer_wrapper
+.global timer_wrapper
 timer_wrapper:
     pusha
     call timer_interupt_handler

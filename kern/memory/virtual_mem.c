@@ -113,6 +113,7 @@ void *get_frame_addr()
 
 int new_pages(void *addr, int len)
 {
+
     assert(addr != NULL);
 
     if (len % PAGE_SIZE != 0)

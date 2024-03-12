@@ -73,6 +73,9 @@ int init_address_space(const char *filename)
   }
 
   int check_align;
+
+  lprintf("check text start %p\n", (void *)se_hdr.e_txtstart);
+
   check_align = align_pages((void *)se_hdr.e_txtstart, se_hdr.e_txtlen);
   if (check_align < 0)
     lprintf("App text pages failed!!\n");

@@ -29,6 +29,7 @@
 #include <elf_410.h>
 #include <inc/vm.h>
 #include <x86/cr.h>
+#include <inc/scheduler.h>
 
 #define STARTING_FILE "idle"
 
@@ -56,7 +57,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     lprintf("Installed Hardware Interupts!\n");
     initialize_vm();
     lprintf("Installed VM!\n");
-    initialize_scheduler();
+    // initialise_scheduler();
 
     /*
      * When kernel_main() begins, interrupts are DISABLED.

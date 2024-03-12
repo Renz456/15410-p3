@@ -23,6 +23,8 @@
 #include <x86/asm.h>
 #include <vm.h>
 #include <simics.h>
+#include <scheduler.h>
+#include <timer.h>
 
 #define TRAP_GATE_CONFIG 0x0F // 0D111 where D is set to 1 for 32 bit gates
 #define SEGMENT_PRESENT 1 << 7
@@ -44,6 +46,7 @@ void install_syscalls()
  * @brief TODO: this needs to do something
  *                  - Try context switch
  *                  - Move stuff from the sleep queue
+ *                  - I MOVED THIS TO SCHEDULER
  *
  *
  * @param tick
@@ -68,8 +71,8 @@ void install_timer()
 void install_hardware_interrupts()
 {
     install_timer();
-    set_tickback(timer_tickback);
-    create_idt_entry(timer_wrapper, KERNEL_DPL, TIMER_IDT_ENTRY);
+    set_tickback(context_tickback);
+    create_idt_entry(timer_interupt_handler, KERNEL_DPL, TIMER_IDT_ENTRY);
     lprintf("timer installed?\n");
     // create_idt_entry(keyboard_wrapper, KERNEL_DPL, KEY_IDT_ENTRY);
 }

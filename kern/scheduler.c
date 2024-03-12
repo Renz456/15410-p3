@@ -8,7 +8,7 @@
  * @bug Need to implement
  */
 
-#include <inc/mutex.h>
+// #include <inc/mutex.h>
 #include <thread_obj.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +16,8 @@
 #include <simics.h>
 #include <cr.h>
 #include <asm_helpers.h>
+#include <inc/scheduler.h>
+#include <assert.h>
 
 int context_enable = 0;
 
@@ -59,7 +61,12 @@ int try_switch()
     return context_enable;
 }
 
-int context_switch(int tid)
+void context_tickback(unsigned int tick)
+{
+    return;
+}
+
+void context_switch(int tid)
 {
     /*
     Probably keep a list of tcbs or smth
@@ -75,33 +82,34 @@ int context_switch(int tid)
     we can do set_cr3 and then pusha etc. because kernel stack is always in kernel space
     Consider the new thread case as it won't have stuff on its stack for registers
     */
-    if (tid == -1)
-    {
-        tid = kernel_gettid();
-    }
+    // if (tid == -1)
+    // {
+    //     tid = kernel_gettid();
+    // }
 
     thread_obj_t *current_thread = find_thread(run_queue_head, run_queue_tail, tid);
-
+    tcb_t *cur_tcb;
     if (current_thread)
     {
         remove_thread(run_queue_head, run_queue_tail, current_thread);
         insert_thread(run_queue_head, run_queue_tail, current_thread);
+        cur_tcb = current_thread->tcb;
     }
     else
     {
-        lprintf("I don't really wanna be here\n");
+        // lprintf("Thread not in run queue\n");
+        cur_tcb = get_tcb();
         return;
     }
 
     thread_obj_t *to_switch = run_queue_head;
 
-    tcb_t *cur_tcb = current_thread->tcb;
     void *save_stack = cur_tcb->esp;
 
     assert(to_switch->tcb->pcb->page_directory);
 
-    set_cr3(to_switch->tcb->pcb->page_directory);
-    set_esp0(to_switch->tcb->kernel_stack); // should this be tcb->esp instead?
+    set_cr3((uint32_t)to_switch->tcb->pcb->page_directory);
+    set_esp0((uint32_t)to_switch->tcb->kernel_stack); // should this be tcb->esp instead?
 
     finish_switch(&save_stack, to_switch->tcb->esp);
 }

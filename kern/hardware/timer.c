@@ -23,11 +23,14 @@ void timer_interupt_handler()
 {
     // Call clock tick callback function
     num_ticks++;
-    tickback(num_ticks);
+
     // MAGIC_BREAK;
-    if (num_ticks % 500 == 0)
-        lprintf("A second has passed!\n");
     outb(INT_CTL_PORT, INT_ACK_CURRENT);
+    if (num_ticks % 500 == 0)
+    {
+        lprintf("A second has passed!\n");
+        tickback(num_ticks);
+    }
 }
 
 /**

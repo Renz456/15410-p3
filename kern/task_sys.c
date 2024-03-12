@@ -5,6 +5,7 @@ int kernel_fork()
 
     Deep copy of parent address space
 
+    Create kernel
 
     */
 }
