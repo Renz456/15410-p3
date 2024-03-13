@@ -66,6 +66,19 @@ void context_tickback(unsigned int tick)
     return;
 }
 
+void add_to_run_queue(tcb_t *tcb, int is_new_thread)
+{
+    thread_obj_t *new_thread = malloc(sizeof(thread_obj_t));
+    new_thread->tcb = tcb;
+    new_thread->tid = tcb->tid;
+    new_thread->next = NULL;
+    new_thread->prev = NULL;
+    new_thread->new_thread = is_new_thread;
+    insert_thread(&run_queue_head, &run_queue_tail, new_thread);
+    lprintf("added thread %d to run queue\n", tcb->tid);
+    assert(run_queue_head);
+}
+
 void context_switch(int tid)
 {
     /*
@@ -87,29 +100,48 @@ void context_switch(int tid)
     //     tid = kernel_gettid();
     // }
 
+    // MAGIC_BREAK;
+
     thread_obj_t *current_thread = find_thread(run_queue_head, run_queue_tail, tid);
     tcb_t *cur_tcb;
     if (current_thread)
     {
-        remove_thread(run_queue_head, run_queue_tail, current_thread);
-        insert_thread(run_queue_head, run_queue_tail, current_thread);
+        remove_thread(&run_queue_head, &run_queue_tail, current_thread);
+        insert_thread(&run_queue_head, &run_queue_tail, current_thread);
+        find_thread(run_queue_head, run_queue_tail, 2);
         cur_tcb = current_thread->tcb;
+        assert(run_queue_tail->tid == current_thread->tid);
     }
     else
     {
-        // lprintf("Thread not in run queue\n");
+        lprintf("Thread not in run queue\n");
         cur_tcb = get_tcb();
-        return;
+        // return;
     }
 
     thread_obj_t *to_switch = run_queue_head;
 
-    void *save_stack = cur_tcb->esp;
+    // void *save_stack = cur_tcb->esp;
 
     assert(to_switch->tcb->pcb->page_directory);
+
+    if (cur_tcb->tid == to_switch->tid)
+    {
+        lprintf("thread %d will not switch\n", cur_tcb->tid);
+        return;
+    }
 
     set_cr3((uint32_t)to_switch->tcb->pcb->page_directory);
     set_esp0((uint32_t)to_switch->tcb->kernel_stack); // should this be tcb->esp instead?
 
-    finish_switch(&save_stack, to_switch->tcb->esp);
+    lprintf("switching to new thread %d from %d! \n", to_switch->tid, cur_tcb->tid);
+    if (to_switch->new_thread)
+    {
+        to_switch->new_thread = 0; // set thread to old
+        new_switch(&cur_tcb->esp, to_switch->tcb->esp);
+    }
+    else
+    {
+        finish_switch(&cur_tcb->esp, to_switch->tcb->esp);
+    }
 }

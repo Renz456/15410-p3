@@ -16,5 +16,6 @@ void enable_contexts();
 void disable_contexts();
 void context_tickback(unsigned int tick);
 void context_switch(int tid);
+void add_to_run_queue(tcb_t *tcb, int is_new_thread);
 
 #endif /* _SCHEDULER_H */

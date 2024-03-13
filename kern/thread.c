@@ -19,6 +19,7 @@
 #include <simics.h>
 #include <assert.h>
 #include <vm.h>
+#include <scheduler.h>
 /**
  * @brief Create a tcb object
  *
@@ -41,7 +42,7 @@ tcb_t *create_tcb(pcb_t *pcb)
     void *kernel_stack_high = kernel_stack + KERNEL_PAGE_SIZE;
     *((unsigned int *)(kernel_stack_high - PTR_SIZE)) = (unsigned int)tcb; // set tcb to the top of kernel stack
 
-    tcb->tid = pcb->num_threads++;
+    tcb->tid = pcb->num_threads++; // TODO atomic increment
     tcb->kernel_stack = kernel_stack_high - 2 * PTR_SIZE;
     tcb->pcb = pcb;
 
@@ -80,12 +81,22 @@ usr_state_t set_user_state(tcb_t *tcb, void *stack_base, void *entry_instruction
     return user_state;
 }
 
+void prepare_thread(tcb_t *tcb, void *stack_base, void *entry_instruction)
+{
+    usr_state_t state = set_user_state(tcb, stack_base, entry_instruction);
+    usr_state_t *load_user = (usr_state_t *)(stack_base - sizeof(usr_state_t));
+    *load_user = state;
+    tcb->esp = (void *)load_user;
+    add_to_run_queue(tcb, 1);
+}
+
 void run_thread(tcb_t *tcb, void *stack_base, void *entry_instruciton)
 {
     // what needs to be here lol
     // mark pointer to kernel stack for future interupts
-    set_esp0((uint32_t)tcb->kernel_stack);
     assert(tcb);
+    set_esp0((uint32_t)tcb->kernel_stack);
+    tcb->esp = stack_base;
     usr_state_t user_state = set_user_state(tcb, stack_base, entry_instruciton);
     lprintf("check user state before run eip: %lx esp:%lx\n", user_state.eip, user_state.esp);
     // user_state.cs += 1;
@@ -94,12 +105,13 @@ void run_thread(tcb_t *tcb, void *stack_base, void *entry_instruciton)
     lprintf("eflags: %lx\n", user_state.eflags);
     lprintf("cs: %lx\n", user_state.cs);
     lprintf("eip: %lx\n", user_state.eip);
+    add_to_run_queue(tcb, 0);
     MAGIC_BREAK;
     exec_user(user_state);
 }
 
 /**
- * @brief
+ * @briefsc
  *
  * @return int
  */

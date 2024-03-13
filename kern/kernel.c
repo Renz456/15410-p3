@@ -30,6 +30,7 @@
 #include <inc/vm.h>
 #include <x86/cr.h>
 #include <inc/scheduler.h>
+#include <inc/kern_constants.h>
 
 #define STARTING_FILE "idle"
 
@@ -72,7 +73,12 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     // void *esp;
     lprintf("process actual start stack %p\n", stack);
     tcb_t *tcb = create_tcb(pcb);
-
+    tcb_t *tcb_2 = create_tcb(pcb);
+    tcb_2->tid = 1;
+    void *stack_2 = (void *)(stack - (3 * PAGE_SIZE));
+    lprintf("check stack 2 %p\n", stack_2);
+    align_pages((void *)(stack_2), 2 * PAGE_SIZE);
+    stack_2 = stack_2 + PAGE_SIZE;
     lprintf("Hello from a brand new kernel!\n");
 
     int app_index = find_app_index(STARTING_FILE);
@@ -96,6 +102,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     }
 
     void *eip = (void *)se_hdr.e_entry;
+    prepare_thread(tcb_2, stack_2, eip);
     lprintf("Entry addr %lx\n", se_hdr.e_entry);
     run_thread(tcb, stack, eip);
 
