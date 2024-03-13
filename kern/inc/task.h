@@ -15,6 +15,8 @@ typedef struct pcb
 {
     int pid;
     // stack info
+    void *stack_high;
+    void *stack_low;
     // address space info
     void *page_directory;
     int num_threads;

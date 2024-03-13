@@ -75,10 +75,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     tcb_t *tcb = create_tcb(pcb);
     tcb_t *tcb_2 = create_tcb(pcb);
     tcb_2->tid = 1;
-    void *stack_2 = (void *)(stack - (3 * PAGE_SIZE));
-    lprintf("check stack 2 %p\n", stack_2);
-    align_pages((void *)(stack_2), 2 * PAGE_SIZE);
-    stack_2 = stack_2 + PAGE_SIZE;
+    void *stack_2 = init_task(pcb);
     lprintf("Hello from a brand new kernel!\n");
 
     int app_index = find_app_index(STARTING_FILE);
