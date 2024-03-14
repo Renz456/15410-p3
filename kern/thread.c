@@ -45,7 +45,7 @@ tcb_t *create_tcb(pcb_t *pcb)
     tcb->tid = pcb->num_threads++; // TODO atomic increment
     tcb->kernel_stack = kernel_stack_high - 2 * PTR_SIZE;
     tcb->pcb = pcb;
-
+    tcb->new_thread = 0;
     /* TODO wb tcb registers?*/
     // init registers?
 
@@ -105,7 +105,7 @@ void run_thread(tcb_t *tcb, void *stack_base, void *entry_instruciton)
     lprintf("eflags: %lx\n", user_state.eflags);
     lprintf("cs: %lx\n", user_state.cs);
     lprintf("eip: %lx\n", user_state.eip);
-    add_to_run_queue(tcb, 0);
+    // add_to_run_queue(tcb, 0);
     MAGIC_BREAK;
     exec_user(user_state);
 }

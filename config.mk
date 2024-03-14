@@ -164,7 +164,8 @@ AUTOSTACK_OBJS = autostack.o
 #
 KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o interrupts/fault_asm_wrappers.o \
 			  interrupts/interupt.o asm_helpers.o task.o gettid_wrapper.o interrupts/handler.o thread.o \
-			  memory/virtual_mem.o hardware/timer.o hardware/keyboard.o scheduler.o thread_obj.o 
+			  memory/virtual_mem.o hardware/timer.o hardware/keyboard.o scheduler.o thread_obj.o \
+			  task_sys.o
 
 
 ###########################################################################

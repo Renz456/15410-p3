@@ -84,6 +84,8 @@ void add_to_run_queue(tcb_t *tcb, int is_new_thread)
 
 void context_switch(int tid)
 {
+    if (context_enable == 0)
+        return;
     /*
     Probably keep a list of tcbs or smth
 
@@ -107,22 +109,14 @@ void context_switch(int tid)
 
     tcb_t *current_thread = find_thread(run_queue_head, run_queue_tail, tid);
     tcb_t *cur_tcb = get_tcb();
-    if (current_thread)
-    {
-        remove_thread(&run_queue_head, &run_queue_tail, current_thread);
-        insert_thread(&run_queue_head, &run_queue_tail, current_thread);
-        // find_thread(run_queue_head, run_queue_tail, 2);
-        // cur_tcb = current_thread->tcb;
-        assert(run_queue_tail->tid == current_thread->tid);
-    }
-    else
-    {
-        lprintf("Thread not in run queue\n");
-        // cur_tcb = get_tcb();
-        // return;
-    }
+    assert(!current_thread);
 
     tcb_t *to_switch = run_queue_head;
+
+    // add current thread to runnable queue and remove head of queue
+    // (since round robin) as the next thread to execute.
+    insert_thread(&run_queue_head, &run_queue_tail, cur_tcb);
+    remove_thread(&run_queue_head, &run_queue_tail, run_queue_head);
 
     // void *save_stack = cur_tcb->esp;
 
