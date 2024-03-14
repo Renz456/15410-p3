@@ -15,6 +15,7 @@
 // #include <vm.h>
 
 #define TASK_PAGE_SIZE PAGE_SIZE
+int next_pid = 0;
 
 static void *setup_main(void *stack_high, void *stack_low);
 
@@ -28,6 +29,7 @@ pcb_t *create_pcb(void *page_directory)
     void *stack_high = (void *)(USER_MEM_END & PAGE_MASK);
     pcb->stack_high = stack_high;
     pcb->stack_low = stack_low;
+    pcb->pid = next_pid++;
     return pcb;
 }
 

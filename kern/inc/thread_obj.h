@@ -23,8 +23,8 @@ typedef struct thread_obj
 
 } thread_obj_t;
 
-void insert_thread(thread_obj_t **head, thread_obj_t **tail, thread_obj_t *thread);
-void remove_thread(thread_obj_t **head, thread_obj_t **tail, thread_obj_t *thread);
-thread_obj_t *find_thread(thread_obj_t *head, thread_obj_t *tail, int tid);
+void insert_thread(tcb_t **head, tcb_t **tail, tcb_t *thread);
+void remove_thread(tcb_t **head, tcb_t **tail, tcb_t *thread);
+tcb_t *find_thread(tcb_t *head, tcb_t *tail, int tid);
 
 #endif /* _THREAD_OBJ_H */

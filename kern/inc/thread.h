@@ -27,6 +27,10 @@ typedef struct tcb
     // process pointer?
     // kernel info?
     void *esp;
+
+    struct tcb *next;
+    struct tcb *prev;
+    int new_thread;
 } tcb_t;
 
 typedef struct usr_state

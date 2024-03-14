@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-void insert_thread(thread_obj_t **head, thread_obj_t **tail, thread_obj_t *thread)
+void insert_thread(tcb_t **head, tcb_t **tail, tcb_t *thread)
 {
     assert(thread != NULL);
     thread->next = NULL;
@@ -27,7 +27,7 @@ void insert_thread(thread_obj_t **head, thread_obj_t **tail, thread_obj_t *threa
     *tail = thread;
 }
 
-void remove_thread(thread_obj_t **head, thread_obj_t **tail, thread_obj_t *thread)
+void remove_thread(tcb_t **head, tcb_t **tail, tcb_t *thread)
 {
     if (thread->next == NULL && thread->prev == NULL)
     { // Only thread in the queue
@@ -51,9 +51,9 @@ void remove_thread(thread_obj_t **head, thread_obj_t **tail, thread_obj_t *threa
     }
 }
 
-thread_obj_t *find_thread(thread_obj_t *head, thread_obj_t *tail, int tid)
+tcb_t *find_thread(tcb_t *head, tcb_t *tail, int tid)
 {
-    for (thread_obj_t *start = head; start != NULL; start = start->next)
+    for (tcb_t *start = head; start != NULL; start = start->next)
     {
         if (start->tid == tid)
         {

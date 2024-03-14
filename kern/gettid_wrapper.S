@@ -12,6 +12,8 @@
 ; #include <inc/gettid_wrapper.h>
 
 
+/* should this become a regular syscall wrapper?? */
+
 .global gettid_wrapper
 
 gettid_wrapper:
