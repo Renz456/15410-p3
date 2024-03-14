@@ -9,7 +9,7 @@
  */
 
 #include <seg.h>
-#include <inc/task_sys.h>
+; #include <inc/task_sys.h>
 ; #include <inc/fork_wrapper.h>
 
 
@@ -39,7 +39,7 @@ fork_wrapper:
 
     pushl %ecx         /* push pointer to gen regs as argument */    
     call kernel_fork
-    popl                /* remove arg */
+    popl  %ecx              /* remove arg */
     /*movl  %eax,-4(%ebp) */  /* store result in the space that was saved earlier */
     movl  %eax,48(%esp)  /* removed ebp as that would be ebp in parent task stack */
     

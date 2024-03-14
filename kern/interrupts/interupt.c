@@ -16,6 +16,7 @@
 #include <inc/keyboard.h>
 #include <keyhelp.h>
 #include <gettid_wrapper.h>
+#include <fork_wrapper.h>
 #include <interupt_internal.h>
 #include <syscall_int.h>
 #include <interupt.h>
@@ -39,6 +40,7 @@ static void create_idt_entry(void *handler, uint8_t dpl, int table_index);
 void install_syscalls()
 {
     create_idt_entry(gettid_wrapper, USER_DPL, GETTID_INT);
+    create_idt_entry(fork_wrapper, USER_DPL, FORK_INT);
     create_idt_entry(new_pages, USER_DPL, NEW_PAGES_INT);
 }
 

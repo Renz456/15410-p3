@@ -1,0 +1,8 @@
+410kern/x86/keylayout.o: 410kern/x86/keylayout.c 410kern/x86/keyhelp.h \
+ 410kern/x86/keylayout.h 410kern/inc/assert.h
+
+410kern/x86/keyhelp.h:
+
+410kern/x86/keylayout.h:
+
+410kern/inc/assert.h:

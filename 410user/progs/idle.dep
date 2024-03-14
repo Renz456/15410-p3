@@ -1,0 +1,10 @@
+410user/progs/idle.o: 410user/progs/idle.c 410user/libsimics/simics.h \
+ 410user/inc/stdarg.h spec/syscall.h spec/ureg.h
+
+410user/libsimics/simics.h:
+
+410user/inc/stdarg.h:
+
+spec/syscall.h:
+
+spec/ureg.h:

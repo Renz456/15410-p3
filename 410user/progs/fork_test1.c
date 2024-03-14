@@ -8,9 +8,9 @@
  */
 
 /* Includes */
-#include <syscall.h>   /* for fork, getpid */
-#include <stdlib.h>    /* for exit */
-#include <stdio.h>     /* for lprintf */
+#include <syscall.h> /* for fork, getpid */
+#include <stdlib.h>  /* for exit */
+#include <stdio.h>   /* for lprintf */
 #include "410_tests.h"
 #include <report.h>
 
@@ -20,22 +20,26 @@ DEF_TEST_NAME("fork_test1:");
 int main(int argc, char *argv[])
 {
   int pid;
-  
+
   report_start(START_CMPLT);
   pid = fork();
-	
-  if( pid < 0 ) {
+
+  if (pid < 0)
+  {
     report_end(END_FAIL);
     exit(-1);
   }
-	
-  if( pid > 0 ) {
+
+  if (pid > 0)
+  {
+    lprintf("parent done?\n");
     report_fmt("parent: tid = %d", gettid());
   }
-  else {
+  else
+  {
     report_fmt("child: tid = %d", gettid());
   }
 
   report_end(END_SUCCESS);
-  exit( 1 );
+  exit(1);
 }

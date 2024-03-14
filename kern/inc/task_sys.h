@@ -28,4 +28,6 @@ typedef struct gen_reg
     unsigned int eax;
 } gen_reg_t;
 
+int kernel_fork(gen_reg_t *regs);
+
 #endif /* _TASK_SYS_H */

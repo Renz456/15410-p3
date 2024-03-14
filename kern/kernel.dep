@@ -1,0 +1,57 @@
+kern/kernel.o: kern/kernel.c spec/common_kern.h 410kern/boot/multiboot.h \
+ 410kern/inc/types.h 410kern/stdio/stdio.h 410kern/inc/stddef.h \
+ 410kern/inc/stdarg.h 410kern/simics/simics.h 410kern/boot/multiboot.h \
+ 410kern/x86/asm.h 410kern/inc/stdint.h kern/inc/interupt.h \
+ kern/inc/thread.h kern/inc/task.h kern/inc/loader.h \
+ 410kern/inc/exec2obj.h 410kern/elf/elf_410.h 410kern/elf/elf32.h \
+ 410kern/elf/elf_common.h kern/inc/vm.h 410kern/x86/cr.h \
+ kern/inc/scheduler.h kern/inc/kern_constants.h spec/syscall.h \
+ spec/ureg.h
+
+spec/common_kern.h:
+
+410kern/boot/multiboot.h:
+
+410kern/inc/types.h:
+
+410kern/stdio/stdio.h:
+
+410kern/inc/stddef.h:
+
+410kern/inc/stdarg.h:
+
+410kern/simics/simics.h:
+
+410kern/boot/multiboot.h:
+
+410kern/x86/asm.h:
+
+410kern/inc/stdint.h:
+
+kern/inc/interupt.h:
+
+kern/inc/thread.h:
+
+kern/inc/task.h:
+
+kern/inc/loader.h:
+
+410kern/inc/exec2obj.h:
+
+410kern/elf/elf_410.h:
+
+410kern/elf/elf32.h:
+
+410kern/elf/elf_common.h:
+
+kern/inc/vm.h:
+
+410kern/x86/cr.h:
+
+kern/inc/scheduler.h:
+
+kern/inc/kern_constants.h:
+
+spec/syscall.h:
+
+spec/ureg.h:

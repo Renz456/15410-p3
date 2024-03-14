@@ -74,7 +74,7 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *
     // void *page_table = (void *)(*(unsigned int *)(pd_start + pd_idx));
     if (check_present((void *)pt_start[pt_idx]))
     {
-        lprintf("page already seems to be mapped %x\n", pt_start[pt_idx]);
+        // lprintf("page already seems to be mapped %x\n", pt_start[pt_idx]);
         return -1;
     }
     pt_start[pt_idx] = (pte)(physical_address | pt_flags);
@@ -157,29 +157,37 @@ int align_pages(void *addr, int size)
     return new_pages((void *)addr_aligned, size_aligned);
 }
 
-void *clone_page_directory(void *old_pd){
+void *clone_page_directory(void *old_pd)
+{
     assert(old_pd != NULL);
     void *start_map = (void *)USER_MEM_START;
     pde *copy_to = create_new_pd();
     pde *copy_from = (pde *)old_pd;
-    while((unsigned int)start_map < 0xffffffff){
+    while ((unsigned int)start_map < 0xffffffff)
+    {
         unsigned int pd_idx = (unsigned int)get_pd_index((void *)start_map);
-        if(!check_present((void *)copy_from[pd_idx])){
-            start_map = start_map + (1 << 22);
+        if (!check_present((void *)copy_from[pd_idx]))
+        {
+            // start_map = start_map + (1 << 22);
+            start_map += PAGE_SIZE;
             continue;
-           // increment by directory
+            // increment by directory
         }
         pte *pt_start = (pte *)(copy_from[pd_idx] & CLEAR_BOTTOM);
         int pt_idx = (unsigned int)get_pt_index((void *)start_map);
         if (!check_present((void *)pt_start[pt_idx]))
         {
-            start_map = start_map + (1 << 12);
+            // start_map = start_map + (1 << 12);
+            start_map += PAGE_SIZE;
             continue;
-            //increment to next page
+            // increment to next page
         }
-        void* new_frame = get_frame_addr();
-        add_frame((unsigned int)start_map, (unsigned int)new_frame, copy_to, USER_PD_FLAG, USER_PT_FLAG); //should copy the actual flags but this should be fine for now
-        memcpy(new_frame, start_map, PAGE_SIZE);
+        void *new_frame = get_frame_addr();
+        if (add_frame((unsigned int)start_map, (unsigned int)new_frame, copy_to, USER_PD_FLAG, USER_PT_FLAG) < 0)
+        {
+            panic("add frame did not work");
+        } // should copy the actual flags but this should be fine for now
+        // memcpy(new_frame, start_map, PAGE_SIZE);
         start_map += PAGE_SIZE;
     }
     return (void *)copy_to;

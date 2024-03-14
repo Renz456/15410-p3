@@ -1,0 +1,36 @@
+kern/scheduler.o: kern/scheduler.c kern/inc/thread_obj.h \
+ kern/inc/thread.h kern/inc/task.h 410kern/inc/stdint.h \
+ 410kern/stdio/stdio.h 410kern/inc/stddef.h 410kern/inc/types.h \
+ 410kern/inc/stdarg.h 410kern/stdlib/stdlib.h 410kern/inc/malloc.h \
+ 410kern/simics/simics.h 410kern/x86/cr.h kern/inc/asm_helpers.h \
+ kern/inc/scheduler.h 410kern/inc/assert.h
+
+kern/inc/thread_obj.h:
+
+kern/inc/thread.h:
+
+kern/inc/task.h:
+
+410kern/inc/stdint.h:
+
+410kern/stdio/stdio.h:
+
+410kern/inc/stddef.h:
+
+410kern/inc/types.h:
+
+410kern/inc/stdarg.h:
+
+410kern/stdlib/stdlib.h:
+
+410kern/inc/malloc.h:
+
+410kern/simics/simics.h:
+
+410kern/x86/cr.h:
+
+kern/inc/asm_helpers.h:
+
+kern/inc/scheduler.h:
+
+410kern/inc/assert.h:

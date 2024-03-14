@@ -32,7 +32,7 @@
 #include <inc/scheduler.h>
 #include <inc/kern_constants.h>
 
-#define STARTING_FILE "idle"
+#define STARTING_FILE "fork_test1"
 
 volatile static int __kernel_all_done = 0;
 
@@ -73,8 +73,8 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     // void *esp;
     lprintf("process actual start stack %p\n", stack);
     tcb_t *tcb = create_tcb(pcb);
-    tcb_t *tcb_2 = create_tcb(pcb);
-    void *stack_2 = init_task(pcb);
+    // tcb_t *tcb_2 = create_tcb(pcb);
+    // void *stack_2 = init_task(pcb);
     lprintf("Hello from a brand new kernel!\n");
 
     int app_index = find_app_index(STARTING_FILE);
@@ -98,7 +98,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     }
 
     void *eip = (void *)se_hdr.e_entry;
-    prepare_thread(tcb_2, stack_2, eip);
+    // prepare_thread(tcb_2, stack_2, eip);
     lprintf("Entry addr %lx\n", se_hdr.e_entry);
     run_thread(tcb, stack, eip);
 

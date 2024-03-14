@@ -1,0 +1,6 @@
+kern/interrupts/handler.o: kern/interrupts/handler.c \
+ 410kern/simics/simics.h 410kern/inc/stdarg.h
+
+410kern/simics/simics.h:
+
+410kern/inc/stdarg.h:

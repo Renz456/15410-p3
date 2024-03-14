@@ -1,0 +1,51 @@
+kern/interrupts/interupt.o: kern/interrupts/interupt.c \
+ 410kern/inc/stdint.h kern/inc/fault_asm_wrappers.h kern/inc/handler.h \
+ kern/inc/asm_helpers.h kern/inc/thread.h kern/inc/task.h \
+ kern/inc/timer.h 410kern/x86/timer_defines.h kern/inc/keyboard.h \
+ 410kern/x86/keyhelp.h kern/inc/gettid_wrapper.h \
+ kern/inc/interupt_internal.h spec/syscall_int.h kern/inc/interupt.h \
+ 410kern/x86/seg.h 410kern/x86/asm.h kern/inc/vm.h \
+ 410kern/simics/simics.h 410kern/inc/stdarg.h kern/inc/scheduler.h \
+ kern/inc/timer.h
+
+410kern/inc/stdint.h:
+
+kern/inc/fault_asm_wrappers.h:
+
+kern/inc/handler.h:
+
+kern/inc/asm_helpers.h:
+
+kern/inc/thread.h:
+
+kern/inc/task.h:
+
+kern/inc/timer.h:
+
+410kern/x86/timer_defines.h:
+
+kern/inc/keyboard.h:
+
+410kern/x86/keyhelp.h:
+
+kern/inc/gettid_wrapper.h:
+
+kern/inc/interupt_internal.h:
+
+spec/syscall_int.h:
+
+kern/inc/interupt.h:
+
+410kern/x86/seg.h:
+
+410kern/x86/asm.h:
+
+kern/inc/vm.h:
+
+410kern/simics/simics.h:
+
+410kern/inc/stdarg.h:
+
+kern/inc/scheduler.h:
+
+kern/inc/timer.h:

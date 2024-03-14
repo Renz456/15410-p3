@@ -1,0 +1,58 @@
+524594605 kdbg: Installed fault handlers!
+
+524595756 kdbg: Installed Sycalls!
+
+524597519 kdbg: Installed Hardware Interupts!
+
+525162489 kdbg: Installed VM!
+
+525210159 kdbg: check start 0xfffff000 end 0xffffe000 stacks for procss
+
+525215655 kdbg: process actual start stack 0xffffefec
+
+525227164 kdbg: check start 0xffffe000 end 0xffffd000 stacks for procss
+
+525228871 kdbg: Hello from a brand new kernel!
+
+525240997 kdbg: check text start 0x01000000
+
+525286852 kdbg: page already seems to be mapped 1004067
+
+525296015 kdbg: added thread 1 to run queue
+
+525300105 kdbg: Entry addr 1000020
+
+525309516 kdbg: check user state before run eip: 1000020 esp:ffffefec
+
+525310718 kdbg: SS: 2b
+
+525314995 kdbg: esp: ffffefec
+
+525316905 kdbg: eflags: 202
+
+525318107 kdbg: cs: 23
+
+525321880 kdbg: eip: 1000020
+
+525323143 udbg: starting user program
+
+525324103 udbg: IN IDLE! 0
+
+1524606378 kdbg: A second has passed in thread 0!
+
+1524609071 kdbg: switching to new thread 1 from 0! 
+
+1524610284 udbg: starting user program
+
+1524611246 udbg: IN IDLE! 1
+
+2524539380 kdbg: A second has passed in thread 1!
+
+2524542073 kdbg: switching to new thread 0 from 1! 
+
+3524472378 kdbg: A second has passed in thread 0!
+
+3524475071 kdbg: switching to new thread 1 from 0! 
+
+4524405380 kdbg: A second has passed in thread 1!
+

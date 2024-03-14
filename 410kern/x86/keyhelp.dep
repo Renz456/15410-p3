@@ -1,0 +1,13 @@
+410kern/x86/keyhelp.o: 410kern/x86/keyhelp.c 410kern/x86/keyhelp.h \
+ 410kern/x86/keylayout.h 410kern/inc/stddef.h 410kern/inc/types.h \
+ 410kern/inc/assert.h
+
+410kern/x86/keyhelp.h:
+
+410kern/x86/keylayout.h:
+
+410kern/inc/stddef.h:
+
+410kern/inc/types.h:
+
+410kern/inc/assert.h:

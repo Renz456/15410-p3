@@ -33,4 +33,6 @@ int get_pd_index(void *entry);
 void *get_frame_addr();
 int new_pages(void *addr, int len);
 int align_pages(void *addr, int size);
+void *clone_page_directory(void *old_pd);
+
 #endif /* _VM_H */

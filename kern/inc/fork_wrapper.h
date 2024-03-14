@@ -11,6 +11,8 @@
 #ifndef _FORK_WRAPPER_H
 #define _FORK_WRAPPER_H
 
+#include <inc/task_sys.h>
+
 void fork_wrapper(void);
 
 #endif /* _FORK_WRAPPER_H */
