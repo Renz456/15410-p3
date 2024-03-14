@@ -10,6 +10,8 @@
 #include <interrupt_defines.h>
 #include <asm.h>
 #include <simics.h>
+#include <inc/thread.h>
+#include <inc/scheduler.h>
 
 void (*tickback)(unsigned int); // Global pointer to the tickback function
 unsigned int num_ticks = 0;     // Counter for timer interupts
@@ -28,8 +30,9 @@ void timer_interupt_handler()
     outb(INT_CTL_PORT, INT_ACK_CURRENT);
     if (num_ticks % 500 == 0)
     {
-        lprintf("A second has passed!\n");
-        tickback(num_ticks);
+        lprintf("A second has passed in thread %d!\n", get_tcb()->tid);
+        // tickback(num_ticks);
+        context_switch(get_tcb()->tid);
     }
 }
 

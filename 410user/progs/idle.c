@@ -12,9 +12,9 @@
 
 int main()
 {
-    int x = 1;
+    // int x = 1;
     // x += 1;
-    x = gettid();
+    int x = gettid();
     lprintf("IN IDLE! %d\n", x);
     // MAGIC_BREAK;
     while (1)

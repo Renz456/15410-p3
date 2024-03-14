@@ -27,6 +27,10 @@ typedef struct tcb
     // process pointer?
     // kernel info?
     void *esp;
+
+    struct tcb *next;
+    struct tcb *prev;
+    int new_thread;
 } tcb_t;
 
 typedef struct usr_state
@@ -41,5 +45,6 @@ typedef struct usr_state
 void run_thread(tcb_t *tcb, void *stack_base, void *entry_instruction);
 tcb_t *get_tcb();
 tcb_t *create_tcb(pcb_t *pcb);
+void prepare_thread(tcb_t *tcb, void *stack_base, void *entry_instruction);
 
 #endif /* _THREAD_KERN_H */

@@ -36,12 +36,15 @@ exec_user:
     leal 8(%ebp), %eax
     /* pushl %eax */                  /* push user state onto stack */
     leal (%eax),%esp
-    /*movl $0xffffefec,%eax
-    movl $0xffffefec,%ebx
-    movl $0xffffefec,%ecx
-    movl $0xffffefec,%edx
-    movl $0xffffefec,%esi
-    movl $0xffffefec,%edi */
+    iret
+
+ .global new_switch
+ new_switch:
+    pusha                 /* save general purpose reg of current thread */
+    movl   36(%esp), %eax /* load first argument to eax (old esp) */
+    movl   %esp, (%eax)   /* save esp in node */
+    movl   40(%esp), %eax /* load second arg (new esp) */
+    leal   (%eax), %esp     /* set new thread esp */
     iret
 
 
@@ -79,7 +82,7 @@ timer_wrapper:
 .global  keyboard_wrapper
 keyboard_wrapper:
     pusha
-    /* call keyboard_interupt_handler */
+    call keyboard_interupt_handler
     popa
     IRET
 

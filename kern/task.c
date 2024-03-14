@@ -15,6 +15,7 @@
 // #include <vm.h>
 
 #define TASK_PAGE_SIZE PAGE_SIZE
+int next_pid = 0;
 
 static void *setup_main(void *stack_high, void *stack_low);
 
@@ -24,6 +25,11 @@ pcb_t *create_pcb(void *page_directory)
     assert(pcb);
     pcb->page_directory = page_directory;
     pcb->num_threads = 0;
+    void *stack_low = (void *)((USER_MEM_END & PAGE_MASK) - TASK_PAGE_SIZE);
+    void *stack_high = (void *)(USER_MEM_END & PAGE_MASK);
+    pcb->stack_high = stack_high;
+    pcb->stack_low = stack_low;
+    pcb->pid = next_pid++;
     return pcb;
 }
 
@@ -35,9 +41,9 @@ pcb_t *create_pcb(void *page_directory)
  */
 void *init_task(pcb_t *pcb)
 {
-    void *stack_low = (void *)((USER_MEM_END & PAGE_MASK) - TASK_PAGE_SIZE);
-    void *stack_high = (void *)(USER_MEM_END & PAGE_MASK);
-
+    void *stack_low = pcb->stack_low;
+    void *stack_high = stack_low + TASK_PAGE_SIZE;
+    pcb->stack_low -= TASK_PAGE_SIZE;
     if (new_pages(stack_low, TASK_PAGE_SIZE) < 0)
         return NULL;
 

@@ -72,9 +72,8 @@ void install_hardware_interrupts()
 {
     install_timer();
     set_tickback(context_tickback);
-    create_idt_entry(timer_interupt_handler, KERNEL_DPL, TIMER_IDT_ENTRY);
-    lprintf("timer installed?\n");
-    // create_idt_entry(keyboard_wrapper, KERNEL_DPL, KEY_IDT_ENTRY);
+    create_idt_entry(timer_wrapper, KERNEL_DPL, TIMER_IDT_ENTRY);
+    create_idt_entry(keyboard_wrapper, KERNEL_DPL, KEY_IDT_ENTRY);
 }
 
 /**
