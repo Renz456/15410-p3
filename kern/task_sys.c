@@ -18,10 +18,11 @@
 #include <simics.h>
 #include <stdio.h>
 #include <string.h>
+#include <inc/asm_helpers.h>
 
-void set_child_stack(tcb_t *tcb, gen_reg_t *regs, tcb_t *cur_tcb)
+void set_child_stack(tcb_t *tcb, gen_reg_t *regs, tcb_t *cur_tcb, void* esp)
 {
-    void *old_esp = regs - PTR_SIZE;
+    void *old_esp = esp + PTR_SIZE;
     unsigned int stack_offset = (unsigned int)cur_tcb->kernel_stack - ((unsigned int)old_esp);
     tcb->esp = tcb->kernel_stack - stack_offset;
     memcpy(tcb->esp, (void *)old_esp, stack_offset);
@@ -34,7 +35,17 @@ void set_child_stack(tcb_t *tcb, gen_reg_t *regs, tcb_t *cur_tcb)
     new_regs->edx = regs->edx;
     new_regs->ecx = regs->ecx;
     new_regs->eax = 0; // child should return 0 from fork
+    lprintf("old esp %p\n", old_esp);
+    MAGIC_BREAK;
     tcb->esp = (void *)new_regs;
+    lprintf("edi %x\n", new_regs->edi);
+    lprintf("esi %x\n", new_regs->esi);
+    lprintf("ebp %x\n", new_regs->ebp);
+    lprintf("zero %x\n", new_regs->zero);
+    lprintf("ebx %x\n", new_regs->ebx);
+    lprintf("edx %x\n", new_regs->edx);
+    lprintf("ecx %x\n", new_regs->ecx);
+    lprintf("eax %x\n", new_regs->eax);
 }
 
 int kernel_fork(gen_reg_t *regs)
@@ -48,8 +59,11 @@ int kernel_fork(gen_reg_t *regs)
     Create kernel
 
     */
+    
+   // 3c1f 1500
+    // MAGIC_BREAK;
+    void* old_esp = get_esp();
 
-    MAGIC_BREAK;
     void *cur_pd = (void *)get_cr3();
 
     void *new_pd = clone_page_directory(cur_pd);
@@ -65,7 +79,7 @@ int kernel_fork(gen_reg_t *regs)
 
     Add this to a runnnable queue
     */
-    set_child_stack(new_tcb, regs, get_tcb());
+    set_child_stack(new_tcb, regs, get_tcb(), old_esp);
     add_to_run_queue(new_tcb, 0);
 
     lprintf("Parent exiting syscall\n");

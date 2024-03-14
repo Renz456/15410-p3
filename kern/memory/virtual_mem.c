@@ -4,7 +4,9 @@
  *         Abhinav Gupta (abhinav6)
  * @brief
  *
- * @bug
+ * @bug if new pages fails in the middle of allocating 
+ * then the prev pages r still being allocated
+ *  they need to be reused/freed
  *
  */
 #include <malloc.h>
@@ -118,21 +120,25 @@ int new_pages(void *addr, int len)
 
     if (len % PAGE_SIZE != 0)
     {
-        panic("len is not page alinged");
+        lprintf("len is not page alinged");
+        return -4;
     }
 
     unsigned int base_addr = (unsigned int)addr;
 
     if (base_addr % PAGE_SIZE != 0)
     {
-        panic("base is not page aligned");
+        lprintf("base is not page aligned");
+        return -3;
     }
 
     if (base_addr < USER_MEM_START)
     {
-        panic("User space trying to access kernel memory");
+        lprintf("User space trying to access kernel memory");
+        return -2;
     }
 
+    int num_pages = 0;
     for (unsigned int start = base_addr; start < base_addr + len; start += PAGE_SIZE)
     {
         void *frame_addr = get_frame_addr();
@@ -140,9 +146,12 @@ int new_pages(void *addr, int len)
         {
             panic("No more pages left to assign");
         }
-        add_frame(start, (unsigned int)frame_addr, (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG);
+        if(add_frame(start, (unsigned int)frame_addr, (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG) < 0){
+            return -1;
+        }
+        num_pages++;
     }
-    // lprintf("added page from %p to %p\n", addr, addr + len);
+    lprintf("address %d pages at address %x", num_pages, (unsigned int)addr);
     return 0;
 }
 
@@ -163,13 +172,18 @@ void *clone_page_directory(void *old_pd)
     void *start_map = (void *)USER_MEM_START;
     pde *copy_to = create_new_pd();
     pde *copy_from = (pde *)old_pd;
-    while ((unsigned int)start_map < 0xffffffff)
+    int pages_copied = 0;
+    while ((unsigned int)start_map < USER_MEM_END 
+    && (unsigned int)start_map >= USER_MEM_START)
     {
+        //MAGIC_BREAK;
+        //lprintf("VA IS %p\n", start_map);
         unsigned int pd_idx = (unsigned int)get_pd_index((void *)start_map);
         if (!check_present((void *)copy_from[pd_idx]))
         {
             // start_map = start_map + (1 << 22);
-            start_map += PAGE_SIZE;
+            //lprintf("Switching to new dir");
+            start_map += (1 << 22);
             continue;
             // increment by directory
         }
@@ -178,17 +192,26 @@ void *clone_page_directory(void *old_pd)
         if (!check_present((void *)pt_start[pt_idx]))
         {
             // start_map = start_map + (1 << 12);
+            //lprintf("Switching to new page");
             start_map += PAGE_SIZE;
             continue;
             // increment to next page
         }
         void *new_frame = get_frame_addr();
-        if (add_frame((unsigned int)start_map, (unsigned int)new_frame, copy_to, USER_PD_FLAG, USER_PT_FLAG) < 0)
+        if (add_frame((unsigned int)start_map, (unsigned int)new_frame,
+         copy_to, USER_PD_FLAG, USER_PT_FLAG) < 0)
         {
+            lprintf("VA FAIL: %x, PHYS FAIL: %x", (unsigned int)start_map, (unsigned int)new_frame);
             panic("add frame did not work");
         } // should copy the actual flags but this should be fine for now
-        // memcpy(new_frame, start_map, PAGE_SIZE);
+        // memcpy(new_frame, start_map, PAGE_SIZE); 
+        //CHECK IF THIS WORKS V POSSIBLE IT DOESN'T
+        lprintf("yay new page has been mapped now VA ADDY: %x",
+        (unsigned int)start_map);
+        pages_copied++;
         start_map += PAGE_SIZE;
     }
+    lprintf("WE copied %d pages", pages_copied);
+    map_kernel_space(copy_to);
     return (void *)copy_to;
 }

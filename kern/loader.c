@@ -77,7 +77,7 @@ int init_address_space(const char *filename)
   lprintf("check text start %p\n", (void *)se_hdr.e_txtstart);
 
   check_align = align_pages((void *)se_hdr.e_txtstart, se_hdr.e_txtlen);
-  if (check_align < 0)
+  if (check_align < -1)
     lprintf("App text pages failed!!\n");
 
   if (getbytes(se_hdr.e_fname, se_hdr.e_txtoff, se_hdr.e_txtlen, (char *)se_hdr.e_txtstart) < 0)
@@ -85,7 +85,7 @@ int init_address_space(const char *filename)
 
   // if ((void *)se_hdr.e_datstart)
   check_align = align_pages((void *)se_hdr.e_datstart, se_hdr.e_datlen);
-  if (check_align < 0)
+  if (check_align < -1)
     lprintf("App data pages failed!!\n");
   // if ((void *)se_hdr.e_datstart)
 
@@ -94,7 +94,7 @@ int init_address_space(const char *filename)
 
   // if ((void *)se_hdr.e_rodatstart)
   check_align = align_pages((void *)se_hdr.e_rodatstart, se_hdr.e_rodatlen);
-  if (check_align < 0)
+  if (check_align < -1)
     lprintf("App rodata pages failed!!\n");
   // if ((void *)se_hdr.e_rodatstart)
 
@@ -102,7 +102,7 @@ int init_address_space(const char *filename)
     lprintf("app rodata get bytes failed\n");
 
   check_align = align_pages((void *)se_hdr.e_bssstart, se_hdr.e_bsslen);
-  if (check_align < 0)
+  if (check_align < -1)
     lprintf("App bss pages failed!!\n");
 
   // bss does not seem to have an offset

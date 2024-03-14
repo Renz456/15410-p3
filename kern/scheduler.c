@@ -107,9 +107,9 @@ void context_switch(int tid)
 
     // MAGIC_BREAK;
 
-    tcb_t *current_thread = find_thread(run_queue_head, run_queue_tail, tid);
+    //tcb_t *current_thread = find_thread(run_queue_head, run_queue_tail, tid);
     tcb_t *cur_tcb = get_tcb();
-    assert(!current_thread);
+    // assert(!current_thread);
 
     tcb_t *to_switch = run_queue_head;
 
@@ -122,12 +122,12 @@ void context_switch(int tid)
 
     assert(to_switch->pcb->page_directory);
 
-    if (cur_tcb->tid == to_switch->tid)
-    {
-        lprintf("thread %d will not switch\n", cur_tcb->tid);
-        return;
-    }
-
+    // if (cur_tcb->tid == to_switch->tid)
+    // {
+    //     lprintf("thread %d will not switch\n", cur_tcb->tid);
+    //     return;
+    // }
+    MAGIC_BREAK;
     set_cr3((uint32_t)to_switch->pcb->page_directory);
     set_esp0((uint32_t)to_switch->kernel_stack); // should this be tcb->esp instead?
 
@@ -139,6 +139,7 @@ void context_switch(int tid)
     }
     else
     {
+        MAGIC_BREAK;
         finish_switch(&cur_tcb->esp, to_switch->esp);
     }
 }
