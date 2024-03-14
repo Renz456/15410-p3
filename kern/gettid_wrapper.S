@@ -35,8 +35,8 @@ gettid_wrapper:
 
     call kernel_gettid
 
-    mov  %eax,-4(%ebp)  
-
+    /* mov  %eax,-4(%ebp)  */
+    movl  %eax,48(%esp) 
     popl %gs
     popl %fs 
     popl %es 

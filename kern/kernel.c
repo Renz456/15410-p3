@@ -58,7 +58,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     lprintf("Installed Hardware Interupts!\n");
     initialize_vm();
     lprintf("Installed VM!\n");
-    // initialise_scheduler();
+    initialise_scheduler();
 
     /*
      * When kernel_main() begins, interrupts are DISABLED.

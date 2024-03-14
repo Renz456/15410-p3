@@ -13,16 +13,22 @@
 #include <inc/thread.h>
 #include <inc/scheduler.h>
 #include <inc/task_sys.h>
+#include <inc/kern_constants.h>
 #include <stdio.h>
+#include <string.h>
 
 void *clone_page_directory(void *pd)
 {
     return NULL;
 }
 
-void set_child_stack(tcb_t *tcb, gen_reg_t *regs)
+void set_child_stack(tcb_t *tcb, gen_reg_t *regs, tcb_t *cur_tcb)
 {
-    gen_reg_t *new_regs = tcb->kernel_stack - sizeof(gen_reg_t);
+    void *old_esp = regs - PTR_SIZE;
+    unsigned int stack_offset = (unsigned int)cur_tcb->kernel_stack - ((unsigned int)old_esp);
+    tcb->esp = tcb->kernel_stack - stack_offset;
+    memcpy(tcb->esp, (void *)old_esp, stack_offset);
+    gen_reg_t *new_regs = tcb->esp - sizeof(gen_reg_t);
     new_regs->edi = regs->edi;
     new_regs->esi = regs->esi;
     new_regs->ebp = regs->ebp;
@@ -31,7 +37,7 @@ void set_child_stack(tcb_t *tcb, gen_reg_t *regs)
     new_regs->edx = regs->edx;
     new_regs->ecx = regs->ecx;
     new_regs->eax = 0; // child should return 0 from fork
-    tcb->kernel_stack -= sizeof(gen_reg_t);
+    tcb->esp = (void *)new_regs;
 }
 
 int kernel_fork(gen_reg_t *regs)
@@ -59,7 +65,7 @@ int kernel_fork(gen_reg_t *regs)
 
     Add this to a runnnable queue
     */
-    set_child_stack(new_tcb, regs);
+    set_child_stack(new_tcb, regs, get_tcb());
     add_to_run_queue(new_tcb, 0);
     return new_pcb->pid;
 }
