@@ -20,6 +20,8 @@
 #include <vm.h>
 #include <simics.h>
 
+hashtable hash_tb;
+
 void *frame_curr = (void *)USER_MEM_START;
 
 int get_pt_index(void *entry)
@@ -95,6 +97,7 @@ void map_kernel_space(pde *pd_start)
 void initialize_vm()
 {
     pde *pd_start = create_new_pd();
+    init_hashtable(&hash_tb);
     map_kernel_space(pd_start);
     set_cr3((unsigned int)pd_start);
     set_cr0(get_cr0() | CR0_PG | CR0_PE);
@@ -132,7 +135,7 @@ int new_pages(void *addr, int len)
     {
         panic("User space trying to access kernel memory");
     }
-
+    int num_pages = 0;
     for (unsigned int start = base_addr; start < base_addr + len; start += PAGE_SIZE)
     {
         void *frame_addr = get_frame_addr();
@@ -141,9 +144,25 @@ int new_pages(void *addr, int len)
             panic("No more pages left to assign");
         }
         add_frame(start, (unsigned int)frame_addr, (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG);
+        num_pages += 1;
     }
     // lprintf("added page from %p to %p\n", addr, addr + len);
+    vm_hash_node_t *new_node = malloc(sizeof(vm_hash_node_t));
+    if(new_node == NULL){
+        return -1;
+    }
+    new_node->addr = addr;
+    new_node->num_pages = num_pages;
+    insert_thread(new_node, &hash_tb); // insert virtual address with the amount of pages it took also
     return 0;
+}
+
+// Hashtable needs to contain virtual address -> len mapping
+int remove_pages(void *addr){
+    assert(addr != NULL);
+    vm_hash_node_t *retrieve_node = get_thread((unsigned int)addr, &hash_tb);
+    int num_pages = retrieve_node->num_pages;
+    
 }
 
 int align_pages(void *addr, int size)
