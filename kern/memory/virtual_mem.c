@@ -156,3 +156,31 @@ int align_pages(void *addr, int size)
 
     return new_pages((void *)addr_aligned, size_aligned);
 }
+
+void *clone_page_directory(void *old_pd){
+    assert(old_pd != NULL);
+    void *start_map = (void *)USER_MEM_START;
+    pde *copy_to = create_new_pd();
+    pde *copy_from = (pde *)old_pd;
+    while((unsigned int)start_map < 0xffffffff){
+        unsigned int pd_idx = (unsigned int)get_pd_index((void *)start_map);
+        if(!check_present((void *)copy_from[pd_idx])){
+            start_map = start_map + (1 << 22);
+            continue;
+           // increment by directory
+        }
+        pte *pt_start = (pte *)(copy_from[pd_idx] & CLEAR_BOTTOM);
+        int pt_idx = (unsigned int)get_pt_index((void *)start_map);
+        if (!check_present((void *)pt_start[pt_idx]))
+        {
+            start_map = start_map + (1 << 12);
+            continue;
+            //increment to next page
+        }
+        void* new_frame = get_frame_addr();
+        add_frame((unsigned int)start_map, (unsigned int)new_frame, copy_to, USER_PD_FLAG, USER_PT_FLAG); //should copy the actual flags but this should be fine for now
+        memcpy(new_frame, start_map, PAGE_SIZE);
+        start_map += PAGE_SIZE;
+    }
+    return (void *)copy_to;
+}
