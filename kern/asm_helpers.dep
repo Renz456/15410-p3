@@ -1,3 +1,0 @@
-kern/asm_helpers.o: kern/asm_helpers.S 410kern/x86/seg.h
-
-410kern/x86/seg.h:

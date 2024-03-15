@@ -20,9 +20,12 @@
 #include <string.h>
 #include <inc/asm_helpers.h>
 
-void set_child_stack(tcb_t *tcb, gen_reg_t *regs, tcb_t *cur_tcb, void* esp)
+void set_child_stack(tcb_t *tcb, gen_reg_t *regs, tcb_t *cur_tcb, void *esp)
 {
-    void *old_esp = esp + PTR_SIZE;
+    /* esp i want : 0x00148fa4*/
+    /* eip i want: bc21 1000 = 001021bc */
+    // TODO explain this magic number
+    void *old_esp = (void *)((uint32_t)regs - 6 * PTR_SIZE);
     unsigned int stack_offset = (unsigned int)cur_tcb->kernel_stack - ((unsigned int)old_esp);
     tcb->esp = tcb->kernel_stack - stack_offset;
     memcpy(tcb->esp, (void *)old_esp, stack_offset);
@@ -35,7 +38,7 @@ void set_child_stack(tcb_t *tcb, gen_reg_t *regs, tcb_t *cur_tcb, void* esp)
     new_regs->edx = regs->edx;
     new_regs->ecx = regs->ecx;
     new_regs->eax = 0; // child should return 0 from fork
-    lprintf("old esp %p\n", old_esp);
+    lprintf("old esp %p regs ardd %p and new esp %p\n", old_esp, regs, (void *)(*((unsigned int *)tcb->esp)));
     MAGIC_BREAK;
     tcb->esp = (void *)new_regs;
     lprintf("edi %x\n", new_regs->edi);
@@ -59,11 +62,11 @@ int kernel_fork(gen_reg_t *regs)
     Create kernel
 
     */
-    
-   // 3c1f 1500
-    // MAGIC_BREAK;
-    void* old_esp = get_esp();
 
+    // 3c1f 1500
+    // MAGIC_BREAK;
+    void *old_esp = get_esp();
+    lprintf("what esp is this %p\n", old_esp);
     void *cur_pd = (void *)get_cr3();
 
     void *new_pd = clone_page_directory(cur_pd);

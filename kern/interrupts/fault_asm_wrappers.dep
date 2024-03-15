@@ -1,2 +1,0 @@
-kern/interrupts/fault_asm_wrappers.o: \
- kern/interrupts/fault_asm_wrappers.S

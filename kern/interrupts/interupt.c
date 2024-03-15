@@ -41,6 +41,7 @@ void install_syscalls()
 {
     create_idt_entry(gettid_wrapper, USER_DPL, GETTID_INT);
     create_idt_entry(fork_wrapper, USER_DPL, FORK_INT);
+    lprintf("check fork %p\n", fork_wrapper);
     create_idt_entry(new_pages, USER_DPL, NEW_PAGES_INT);
 }
 
