@@ -86,4 +86,9 @@ keyboard_wrapper:
     popa
     IRET
 
+.global flush_page_entry
+flush_page_entry:
+    mov 4(%esp), %eax
+    INVLPG (%eax)
+    ret
 

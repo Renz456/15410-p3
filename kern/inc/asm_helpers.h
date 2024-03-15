@@ -21,5 +21,6 @@ void timer_wrapper();
 void keyboard_wrapper();
 void new_switch(void **old_esp, void *new_esp);
 void finish_switch(void **old_esp, void *new_esp);
+void flush_page_entry(unsigned int address);
 
 #endif /* _ASM_HELPER_KERN_H */

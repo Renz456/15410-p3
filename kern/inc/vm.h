@@ -25,6 +25,8 @@ typedef unsigned int pde;
 #define CLEAR_BOTTOM 0xFFFFF000
 #define PRESENT_BIT_MASK 0x1
 
+#define COPY_ADDR_VA 0x0f000000
+
 int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *pd_start, int pd_flags, int pt_flags);
 void map_kernel_space(pde *pd_start);
 void initialize_vm();

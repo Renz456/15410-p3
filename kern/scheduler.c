@@ -129,6 +129,8 @@ void context_switch(int tid)
     // }
     MAGIC_BREAK;
     set_cr3((uint32_t)to_switch->pcb->page_directory);
+    lprintf("CR3 has been set");
+    MAGIC_BREAK;
     set_esp0((uint32_t)to_switch->kernel_stack); // should this be tcb->esp instead?
 
     lprintf("switching to new thread %d from %d! \n", to_switch->tid, cur_tcb->tid);

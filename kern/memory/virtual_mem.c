@@ -21,6 +21,7 @@
 #include <inc/kern_constants.h>
 #include <vm.h>
 #include <simics.h>
+#include <inc/asm_helpers.h>
 
 void *frame_curr = (void *)USER_MEM_START;
 
@@ -46,7 +47,8 @@ unsigned int set_flags(void *entry, int flags)
 
 pde *create_new_pd()
 {
-    pde *pd_new = smemalign(PAGE_SIZE, PAGE_SIZE); // Allocating array of 1024 unsigned ints
+    pde *pd_new = smemalign(PAGE_SIZE, PAGE_SIZE); 
+    // Allocating array of 1024 unsigned ints
     // pde *pd_new = smalloc(PAGE_SIZE);
     assert(pd_new);
     memset(pd_new, 0, PAGE_SIZE); // Setting all to 0 in the start
@@ -54,14 +56,16 @@ pde *create_new_pd()
 }
 
 // Need to check for flags
-int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *pd_start, int pd_flags, int pt_flags)
+int add_frame(unsigned int virtual_address, unsigned int physical_address, 
+              pde *pd_start, int pd_flags, int pt_flags)
 {
     unsigned int pd_idx = (unsigned int)get_pd_index((void *)virtual_address);
     // Check if the pd_start[pd_idx] is present otherwise create
     // Check if pd_start[pd_idx][pt_idx] is present otherwise create
     // Once both and creating then store frame in pd_start[pd_idx][pt_idx]
     // Need to read about the bottom 12 bit flags associated with both entries
-    if (!check_present((void *)pd_start[pd_idx])) // Checking if the directory is present or not, if not then we create it and set the PD flags
+    if (!check_present((void *)pd_start[pd_idx])) 
+    // Checking if the directory is present or not, if not then we create it and set the PD flags
     {
         pde *new_page_table = create_new_pd();
         // lprintf("check addr %x new pt %p\n", new_page_table[get_pt_index((void *)virtual_address)], new_page_table);
@@ -74,10 +78,13 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *
     // lprintf("check pte %x check pt index %d ptstart %p\n", pt_start[pt_idx], pt_idx, pt_start);
 
     // void *page_table = (void *)(*(unsigned int *)(pd_start + pd_idx));
-    if (check_present((void *)pt_start[pt_idx]))
+    if (check_present((void *)pt_start[pt_idx]) && virtual_address != (unsigned int)COPY_ADDR_VA)
     {
         // lprintf("page already seems to be mapped %x\n", pt_start[pt_idx]);
         return -1;
+    }
+    if(virtual_address == (unsigned int)COPY_ADDR_VA){
+        lprintf("Created a mapping to PHYS space %x", physical_address);
     }
     pt_start[pt_idx] = (pte)(physical_address | pt_flags);
     return 0;
@@ -173,6 +180,7 @@ void *clone_page_directory(void *old_pd)
     pde *copy_to = create_new_pd();
     pde *copy_from = (pde *)old_pd;
     int pages_copied = 0;
+    assert(get_cr3() == (uint32_t)old_pd);
     while ((unsigned int)start_map < USER_MEM_END 
     && (unsigned int)start_map >= USER_MEM_START)
     {
@@ -198,20 +206,38 @@ void *clone_page_directory(void *old_pd)
             // increment to next page
         }
         void *new_frame = get_frame_addr();
+        // memcpy(new_frame, start_map, PAGE_SIZE); 
+        //CHECK IF THIS WORKS V POSSIBLE IT DOESN'T
+        lprintf("yay new page has been mapped now VA ADDY: %x",(unsigned int)start_map);
+        if (add_frame((unsigned int)COPY_ADDR_VA, (unsigned int)new_frame,
+         copy_from, USER_PD_FLAG, USER_PT_FLAG) < 0){
+            lprintf("Something wrong happened here");
+        }
+        flush_page_entry((unsigned int)COPY_ADDR_VA);
+        memmove((void *)COPY_ADDR_VA, (void *)start_map, PAGE_SIZE); 
+        int *check_1 = (int *)COPY_ADDR_VA;
+        int *check_2 = (int *)start_map;
+        for(int i = 0; i < 1024; i++){
+            assert(check_1[i] == check_2[i]);
+        }
         if (add_frame((unsigned int)start_map, (unsigned int)new_frame,
          copy_to, USER_PD_FLAG, USER_PT_FLAG) < 0)
         {
             lprintf("VA FAIL: %x, PHYS FAIL: %x", (unsigned int)start_map, (unsigned int)new_frame);
             panic("add frame did not work");
         } // should copy the actual flags but this should be fine for now
-        // memcpy(new_frame, start_map, PAGE_SIZE); 
-        //CHECK IF THIS WORKS V POSSIBLE IT DOESN'T
-        lprintf("yay new page has been mapped now VA ADDY: %x",
-        (unsigned int)start_map);
         pages_copied++;
         start_map += PAGE_SIZE;
     }
-    lprintf("WE copied %d pages", pages_copied);
+    // lprintf("WE copied %d pages", pages_copied);
     map_kernel_space(copy_to);
+    MAGIC_BREAK;
+    // set_cr3((uint32_t)copy_to);
+    // set_cr0(get_cr0() | CR0_PG | CR0_PE);
+    // lprintf("MAKE SURE TO CHANGE THIS BACK");
+    MAGIC_BREAK;
+
     return (void *)copy_to;
 }
+
+//disassemble 0x0100138e
