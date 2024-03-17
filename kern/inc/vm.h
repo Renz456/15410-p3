@@ -11,22 +11,6 @@
 #ifndef _VM_H
 #define _VM_H
 
-#define SIZE_HASH 1000
-
-typedef struct vm_hash_node_s
-{
-    void *addr;
-    int num_pages;
-    struct vm_hash_node_s *next;
-    struct vm_hash_node_s *prev;
-} vm_hash_node_t;
-
-typedef struct hashtable
-{
-    int items;
-    vm_hash_node_t *table[SIZE_HASH]; // An array of pointers to nodes (linked list heads)
-} hashtable;
-
 typedef unsigned int pte;
 typedef unsigned int pde;
 
@@ -41,6 +25,8 @@ typedef unsigned int pde;
 #define CLEAR_BOTTOM 0xFFFFF000
 #define PRESENT_BIT_MASK 0x1
 
+#define COPY_ADDR_VA 0x0f000000
+
 int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *pd_start, int pd_flags, int pt_flags);
 void map_kernel_space(pde *pd_start);
 void initialize_vm();
@@ -48,7 +34,7 @@ int get_pt_index(void *entry);
 int get_pd_index(void *entry);
 void *get_frame_addr();
 int new_pages(void *addr, int len);
-int remove_pages(void *addr);
 int align_pages(void *addr, int size);
 void *clone_page_directory(void *old_pd);
+
 #endif /* _VM_H */

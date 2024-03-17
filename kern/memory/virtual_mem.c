@@ -19,10 +19,23 @@
 #include <inc/kern_constants.h>
 #include <vm.h>
 #include <simics.h>
+#include <memory/hash_helper.h>
 
 hashtable hash_tb;
+frame_node_t* head = NULL;
 
 void *frame_curr = (void *)USER_MEM_START;
+
+// Top 
+void *get_physical_address(void *pt_entry){
+    return (void *)((unsigned int)pt_entry & ~TEN_BIT_MASK);
+}
+
+// This makes sense right??
+void set_not_present(pte pt_entry){
+    pt_entry = (pte)(0);
+    return;
+}
 
 int get_pt_index(void *entry)
 {
@@ -51,6 +64,31 @@ pde *create_new_pd()
     assert(pd_new);
     memset(pd_new, 0, PAGE_SIZE); // Setting all to 0 in the start
     return pd_new;
+}
+
+void *remove_frame(unsigned int virtual_address, pde *pd_start){   
+    assert(pd_start != NULL);
+    unsigned int pd_idx = (unsigned int)get_pd_index((void *)virtual_address);
+    if (!check_present((void *)pd_start[pd_idx])) 
+    {
+        // Directory is not present
+        lprintf("trying to remove page with non present directory");
+        return NULL;
+    }
+
+    pte *pt_start = (pte *)(pd_start[pd_idx] & CLEAR_BOTTOM);
+    int pt_idx = (unsigned int)get_pt_index((void *)virtual_address);
+
+    if (!check_present((void *)pt_start[pt_idx]))
+    {
+        lprintf("trying to remove page with non present page");
+        return NULL;
+    }
+
+    void* free_frame = get_physical_address((void *)pt_start[pt_idx]);
+    set_not_present((void *)pt_start[pt_idx]);
+
+    return free_frame;
 }
 
 // Need to check for flags
@@ -105,6 +143,11 @@ void initialize_vm()
 
 void *get_frame_addr()
 {
+    void *ret_frame;
+    ret_frame = get_free_frame(head);
+    if(ret_frame != NULL){
+        return ret_frame;
+    }
     void *ret_frame = frame_curr;
     frame_curr += PAGE_SIZE;
     if ((unsigned int)ret_frame > machine_phys_frames() * PAGE_SIZE)
@@ -160,9 +203,20 @@ int new_pages(void *addr, int len)
 // Hashtable needs to contain virtual address -> len mapping
 int remove_pages(void *addr){
     assert(addr != NULL);
+    if((unsigned int)addr < USER_MEM_START){
+        // Trying to remove kernel pages
+        return -1;
+    }
     vm_hash_node_t *retrieve_node = get_thread((unsigned int)addr, &hash_tb);
     int num_pages = retrieve_node->num_pages;
-    
+    void* start_addr = retrieve_node->addr;
+    remove_thread(retrieve_node, &hash_tb); //Remove thread from hash_tb
+    unsigned int start = (unsigned int)addr;
+    for(unsigned int start_addr = start; start_addr < (start + (PAGE_SIZE*num_pages)); start_addr += PAGE_SIZE){
+        void* frame_addr = remove_frame(start_addr, (pde *)((void *)(get_cr3)));
+        add_free_frame(frame_addr, head);
+    }
+    return 0;
 }
 
 int align_pages(void *addr, int size)
@@ -176,6 +230,7 @@ int align_pages(void *addr, int size)
     return new_pages((void *)addr_aligned, size_aligned);
 }
 
+// THIS NEEDS TO BE SQUASHED IN THE MERGE WITH CTX_SWITCH THIS IS WRONG
 void *clone_page_directory(void *old_pd){
     assert(old_pd != NULL);
     void *start_map = (void *)USER_MEM_START;

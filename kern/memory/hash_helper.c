@@ -13,9 +13,8 @@
 
 #include <simics.h>
 #include <stdio.h>
-#include <hash_helper.h>
 #include <assert.h>
-#include <vm.h>
+#include <memory/hash_helper.h>
 
 /**
  * @brief Frees the hashtable by passing all nodes thread_free_lock_destory
@@ -146,4 +145,20 @@ vm_hash_node_t *get_thread(unsigned int addr, hashtable *hash_tb)
         start = start->next;
     }
     return NULL;
+}
+
+void add_free_frame(void *frame_addr, frame_node_t* head){
+    frame_node_t* new_node = malloc(sizeof(frame_node_t));
+    new_node->frame_addr = frame_addr;
+    new_node->next = head;
+    head = new_node;
+}
+
+void *get_free_frame(frame_node_t* head){
+    if(head == NULL){
+        return NULL;
+    }
+    frame_node_t* ret_val = head;
+    head = head->next;
+    return ret_val->frame_addr;
 }
