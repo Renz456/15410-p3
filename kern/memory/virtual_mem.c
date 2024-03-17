@@ -25,26 +25,41 @@
 
 void *frame_curr = (void *)USER_MEM_START;
 
+/// @brief 
+/// @param entry 
+/// @return 
 int get_pt_index(void *entry)
 {
     return (((unsigned int)entry >> 12) & TEN_BIT_MASK);
 }
 
+/// @brief 
+/// @param entry 
+/// @return 
 int get_pd_index(void *entry)
 {
     return (((unsigned int)entry >> 22) & TEN_BIT_MASK);
 }
 
+/// @brief 
+/// @param entry 
+/// @return 
 int check_present(void *entry)
 {
     return ((unsigned int)entry & PRESENT_BIT_MASK);
 }
 
+/// @brief 
+/// @param entry 
+/// @param flags 
+/// @return 
 unsigned int set_flags(void *entry, int flags)
 {
     return ((unsigned int)entry | flags);
 }
 
+/// @brief 
+/// @return 
 pde *create_new_pd()
 {
     pde *pd_new = smemalign(PAGE_SIZE, PAGE_SIZE); 
@@ -55,7 +70,13 @@ pde *create_new_pd()
     return pd_new;
 }
 
-// Need to check for flags
+/// @brief 
+/// @param virtual_address 
+/// @param physical_address 
+/// @param pd_start 
+/// @param pd_flags 
+/// @param pt_flags 
+/// @return 
 int add_frame(unsigned int virtual_address, unsigned int physical_address, 
               pde *pd_start, int pd_flags, int pt_flags)
 {
@@ -90,6 +111,8 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address,
     return 0;
 }
 
+/// @brief 
+/// @param pd_start 
 void map_kernel_space(pde *pd_start)
 {
     for (unsigned int map_start = 0; map_start < USER_MEM_START; map_start += PAGE_SIZE)
@@ -101,6 +124,7 @@ void map_kernel_space(pde *pd_start)
     }
 }
 
+/// @brief 
 void initialize_vm()
 {
     pde *pd_start = create_new_pd();
@@ -109,6 +133,8 @@ void initialize_vm()
     set_cr0(get_cr0() | CR0_PG | CR0_PE);
 }
 
+/// @brief 
+/// @return 
 void *get_frame_addr()
 {
     void *ret_frame = frame_curr;
@@ -120,6 +146,10 @@ void *get_frame_addr()
     return ret_frame;
 }
 
+/// @brief 
+/// @param addr 
+/// @param len 
+/// @return 
 int new_pages(void *addr, int len)
 {
 
@@ -162,6 +192,10 @@ int new_pages(void *addr, int len)
     return 0;
 }
 
+/// @brief 
+/// @param addr 
+/// @param size 
+/// @return 
 int align_pages(void *addr, int size)
 {
     unsigned int addr_aligned = (unsigned int)addr & PAGE_MASK;
@@ -173,6 +207,9 @@ int align_pages(void *addr, int size)
     return new_pages((void *)addr_aligned, size_aligned);
 }
 
+/// @brief Clones a directory
+/// @param old_pd 
+/// @return 
 void *clone_page_directory(void *old_pd)
 {
     assert(old_pd != NULL);
@@ -189,8 +226,6 @@ void *clone_page_directory(void *old_pd)
         unsigned int pd_idx = (unsigned int)get_pd_index((void *)start_map);
         if (!check_present((void *)copy_from[pd_idx]))
         {
-            // start_map = start_map + (1 << 22);
-            //lprintf("Switching to new dir");
             start_map += (1 << 22);
             continue;
             // increment by directory
@@ -199,14 +234,11 @@ void *clone_page_directory(void *old_pd)
         int pt_idx = (unsigned int)get_pt_index((void *)start_map);
         if (!check_present((void *)pt_start[pt_idx]))
         {
-            // start_map = start_map + (1 << 12);
-            //lprintf("Switching to new page");
             start_map += PAGE_SIZE;
             continue;
             // increment to next page
         }
         void *new_frame = get_frame_addr();
-        // memcpy(new_frame, start_map, PAGE_SIZE); 
         //CHECK IF THIS WORKS V POSSIBLE IT DOESN'T
         lprintf("yay new page has been mapped now VA ADDY: %x",(unsigned int)start_map);
         if (add_frame((unsigned int)COPY_ADDR_VA, (unsigned int)new_frame,
@@ -231,12 +263,6 @@ void *clone_page_directory(void *old_pd)
     }
     // lprintf("WE copied %d pages", pages_copied);
     map_kernel_space(copy_to);
-    MAGIC_BREAK;
-    // set_cr3((uint32_t)copy_to);
-    // set_cr0(get_cr0() | CR0_PG | CR0_PE);
-    // lprintf("MAKE SURE TO CHANGE THIS BACK");
-    MAGIC_BREAK;
-
     return (void *)copy_to;
 }
 
