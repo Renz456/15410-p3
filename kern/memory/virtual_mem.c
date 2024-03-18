@@ -28,7 +28,7 @@ void *frame_curr = (void *)USER_MEM_START;
 
 // Top 
 void *get_physical_address(void *pt_entry){
-    return (void *)((unsigned int)pt_entry & ~TEN_BIT_MASK);
+    return (void *)((unsigned int)pt_entry & ~TWELVE_BIT_MASK); // This needs to be a 12 bit mask, check handout
 }
 
 // This makes sense right??

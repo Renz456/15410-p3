@@ -15,6 +15,7 @@ typedef unsigned int pte;
 typedef unsigned int pde;
 
 #define TEN_BIT_MASK 0x3FF
+#define TWELVE_BIT_MASK 0xfff
 #define MSB_SET_MASK 0x80000000
 
 #define KERN_PD_FLAG 0b000100000011
