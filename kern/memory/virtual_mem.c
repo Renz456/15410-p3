@@ -234,14 +234,50 @@ void *clone_page_directory(void *old_pd)
     return (void *)copy_to;
 }
 
-// int validate_string()
-
-int validate_string_array(char *string_arr[], int len)
+/* Check present and supervisor flags */
+int check_vaddr(void *addr)
 {
-    for (int i = 0; i < len; i++)
+    if (in_user_mem < 0)
+        return -1;
+    unsigned int page = addr & PAGE_MASK;
+    int flags = PRESENT_BIT_MASK | SUPERVISOR_BIT_MASK; // Address does not need to be writable
+    pde *pd = (pde *)get_cr3();
+    if (pd & PRESENT_BIT_MASK)
     {
+        pte *page_table = pd[get_pd_index(addr)];
+        if (page_table[get_pt_index(addr)] & flags)
+            return 0;
     }
-    return 0;
+
+    return -1;
+}
+
+int validate_string(char *string)
+{
+    // assuming all strings end with null terminator
+    int len = 0;
+    while (check_vaddr(string + len) == 0)
+    {
+        len++;
+        if (string[len] == '\0')
+            return len;
+    }
+    return -1;
+}
+
+int validate_string_array(char *string_arr[])
+{
+    int len = 0;
+    while (check_vaddr(string_arr + len) == 0)
+    {
+        if (string_arr[len] == NULL)
+            return len;
+        if (validate_string(string_arr[len]) >= 0)
+            len++;
+        else
+            return -1
+    }
+    return -2;
 }
 
 int in_user_mem(unsigned int addr)

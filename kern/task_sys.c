@@ -93,6 +93,7 @@ int kernel_fork(gen_reg_t *regs)
   return new_pcb->pid;
 }
 
+// temp function need to remove
 int get_arg_len(char *arg_arr[])
 {
   int i = 0;
@@ -118,14 +119,15 @@ int kernel_exec(char *execname, char *argvec[])
     return -1;
   }
 
-  // if (validate_string_array(argvec) < 0)
-  // {
-  //   return -2;
-  // }
+  int argc;
+  if (argc = validate_string_array(argvec) < 0)
+  {
+    return -2;
+  }
 
   // int exec_len = validate_string(execname);
 
-  int argc = get_arg_len(argvec);
+  argc = get_arg_len(argvec);
 
   void *user_stack = init_task(pcb, (char **)argvec, argc);
 
