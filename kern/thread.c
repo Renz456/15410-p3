@@ -20,6 +20,9 @@
 #include <assert.h>
 #include <vm.h>
 #include <scheduler.h>
+
+int num_threads = 0;
+
 /**
  * @brief Create a tcb object
  *
@@ -42,12 +45,12 @@ tcb_t *create_tcb(pcb_t *pcb)
     void *kernel_stack_high = kernel_stack + KERNEL_PAGE_SIZE;
     *((unsigned int *)(kernel_stack_high - PTR_SIZE)) = (unsigned int)tcb; // set tcb to the top of kernel stack
 
-    tcb->tid = pcb->num_threads++; // TODO atomic increment
+    tcb->tid = atomic_increment(&num_threads);
+    atomic_increment(&pcb->num_threads);
+
     tcb->kernel_stack = kernel_stack_high - 2 * PTR_SIZE;
     tcb->pcb = pcb;
     tcb->new_thread = 0;
-    /* TODO wb tcb registers?*/
-    // init registers?
 
     // tcb->stack_high = stack;
     // tcb->stack_low = stack - KERNEL_PAGE_SIZE;

@@ -17,7 +17,7 @@
 #define TASK_PAGE_SIZE PAGE_SIZE
 int next_pid = 0;
 
-static void *setup_main(void *stack_high, void *stack_low);
+static void *setup_main(void *stack_high, void *stack_low, char **argv, int argc);
 
 pcb_t *create_pcb(void *page_directory)
 {
@@ -34,12 +34,12 @@ pcb_t *create_pcb(void *page_directory)
 }
 
 /**
- * @brief
+ * @brief Returns top of user stack for program?
  *
  * @param pcb : This might not be necessary
  * @return void*
  */
-void *init_task(pcb_t *pcb)
+void *init_task(pcb_t *pcb, char **argv, int argc)
 {
     void *stack_low = pcb->stack_low;
     void *stack_high = stack_low + TASK_PAGE_SIZE;
@@ -48,7 +48,7 @@ void *init_task(pcb_t *pcb)
         return NULL;
 
     lprintf("check start %p end %p stacks for procss\n", stack_high, stack_low);
-    return setup_main(stack_high, stack_low);
+    return setup_main(stack_high, stack_low, argv, argc);
 }
 
 /**
@@ -58,11 +58,11 @@ void *init_task(pcb_t *pcb)
  * @param stack_low
  * @return void*
  */
-static void *setup_main(void *stack_high, void *stack_low)
+static void *setup_main(void *stack_high, void *stack_low, char **argv, int argc)
 {
     crt0_main_t *args = stack_high - sizeof(crt0_main_t);
-    args->argc = 0;
-    args->argv = NULL;
+    args->argc = argc;
+    args->argv = argv;
     args->stack_high = stack_high;
     args->stack_low = stack_low;
 
