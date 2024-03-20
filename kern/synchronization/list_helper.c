@@ -35,7 +35,7 @@ int add_queue(int tid, mut_queue_t* queue){
     return 0;
 }
 
-int remove_queue(int tid, mut_queue_t* queue){
+int remove_queue(mut_queue_t* queue){
     assert(queue != NULL && queue->size > 0);
     int ret_val = queue->head->tid;
     mut_queue_t* free_node = queue->head;

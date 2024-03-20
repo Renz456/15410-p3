@@ -25,12 +25,18 @@ typedef struct mut_queue_t
     int size;
 }mut_queue_t;
 
+typedef struct mutex
+{
+    int locked;
+    mut_queue_t wait_queue;
+}mutex_t;
+
 int queue_init(mut_queue_t* queue);
 
 int queue_destroy(mut_queue_t* queue);
 
 int add_queue(int tid, mut_queue_t* queue);
 
-int remove_queue(int tid, mut_queue_t* queue);
+int remove_queue(mut_queue_t* queue);
 
 #endif /* _LIST_HELPER_H */
