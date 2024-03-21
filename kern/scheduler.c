@@ -83,7 +83,8 @@ void add_to_run_queue(tcb_t *tcb, int is_new_thread)
  *
  *        Note no changes to eip need to be made as all threads will switch
  *        in this function.
- *
+ *        Note2 yield will probs be the only other function that calls this,
+ *        we will have to send a timer ack when it does.
  *
  * @param tid
  */
