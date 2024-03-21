@@ -21,7 +21,10 @@
 #include <inc/kern_constants.h>
 #include <vm.h>
 #include <simics.h>
-#include <inc/asm_helpers.h>
+#include <memory/hash_helper.h>
+
+hashtable hash_tb;
+frame_node_t* head = NULL;
 
 void *frame_curr = (void *)USER_MEM_START;
 
@@ -85,7 +88,7 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address,
     // Check if pd_start[pd_idx][pt_idx] is present otherwise create
     // Once both and creating then store frame in pd_start[pd_idx][pt_idx]
     // Need to read about the bottom 12 bit flags associated with both entries
-    if (!check_present((void *)pd_start[pd_idx])) 
+    if (!check_present((void *)pd_start[pd_idx]))
     // Checking if the directory is present or not, if not then we create it and set the PD flags
     {
         pde *new_page_table = create_new_pd();
@@ -104,7 +107,8 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address,
         // lprintf("page already seems to be mapped %x\n", pt_start[pt_idx]);
         return -1;
     }
-    if(virtual_address == (unsigned int)COPY_ADDR_VA){
+    if (virtual_address == (unsigned int)COPY_ADDR_VA)
+    {
         lprintf("Created a mapping to PHYS space %x", physical_address);
     }
     pt_start[pt_idx] = (pte)(physical_address | pt_flags);
@@ -128,6 +132,7 @@ void map_kernel_space(pde *pd_start)
 void initialize_vm()
 {
     pde *pd_start = create_new_pd();
+    init_hashtable(&hash_tb);
     map_kernel_space(pd_start);
     set_cr3((unsigned int)pd_start);
     set_cr0(get_cr0() | CR0_PG | CR0_PE);
@@ -137,6 +142,11 @@ void initialize_vm()
 /// @return 
 void *get_frame_addr()
 {
+    void *ret_frame;
+    ret_frame = get_free_frame(head);
+    if(ret_frame != NULL){
+        return ret_frame;
+    }
     void *ret_frame = frame_curr;
     frame_curr += PAGE_SIZE;
     if ((unsigned int)ret_frame > machine_phys_frames() * PAGE_SIZE)
@@ -174,21 +184,29 @@ int new_pages(void *addr, int len)
         lprintf("User space trying to access kernel memory");
         return -2;
     }
-
     int num_pages = 0;
-    for (unsigned int start = base_addr; start < base_addr + len; start += PAGE_SIZE)
+    for (unsigned int start = base_addr; start < base_addr + len;
+         start += PAGE_SIZE)
     {
         void *frame_addr = get_frame_addr();
         if (frame_addr == NULL)
         {
             panic("No more pages left to assign");
         }
-        if(add_frame(start, (unsigned int)frame_addr, (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG) < 0){
+        if (add_frame(start, (unsigned int)frame_addr, (pde *)((void *)get_cr3()),
+                      USER_PD_FLAG, USER_PT_FLAG) < 0)
+        {
             return -1;
         }
-        num_pages++;
+    vm_hash_node_t *retrieve_node = get_thread((unsigned int)addr, &hash_tb);
+    int num_pages = retrieve_node->num_pages;
+    void* start_addr = retrieve_node->addr;
+    remove_thread(retrieve_node, &hash_tb); //Remove thread from hash_tb
+    unsigned int start = (unsigned int)addr;
+    for(unsigned int start_addr = start; start_addr < (start + (PAGE_SIZE*num_pages)); start_addr += PAGE_SIZE){
+        void* frame_addr = remove_frame(start_addr, (pde *)((void *)(get_cr3)));
+        add_free_frame(frame_addr, head);
     }
-    lprintf("address %d pages at address %x", num_pages, (unsigned int)addr);
     return 0;
 }
 
@@ -218,11 +236,10 @@ void *clone_page_directory(void *old_pd)
     pde *copy_from = (pde *)old_pd;
     int pages_copied = 0;
     assert(get_cr3() == (uint32_t)old_pd);
-    while ((unsigned int)start_map < USER_MEM_END 
-    && (unsigned int)start_map >= USER_MEM_START)
+    while ((unsigned int)start_map < USER_MEM_END && (unsigned int)start_map >= USER_MEM_START)
     {
-        //MAGIC_BREAK;
-        //lprintf("VA IS %p\n", start_map);
+        // MAGIC_BREAK;
+        // lprintf("VA IS %p\n", start_map);
         unsigned int pd_idx = (unsigned int)get_pd_index((void *)start_map);
         if (!check_present((void *)copy_from[pd_idx]))
         {
@@ -242,18 +259,14 @@ void *clone_page_directory(void *old_pd)
         //CHECK IF THIS WORKS V POSSIBLE IT DOESN'T
         lprintf("yay new page has been mapped now VA ADDY: %x",(unsigned int)start_map);
         if (add_frame((unsigned int)COPY_ADDR_VA, (unsigned int)new_frame,
-         copy_from, USER_PD_FLAG, USER_PT_FLAG) < 0){
+                      copy_from, USER_PD_FLAG, USER_PT_FLAG) < 0)
+        {
             lprintf("Something wrong happened here");
         }
         flush_page_entry((unsigned int)COPY_ADDR_VA);
-        memmove((void *)COPY_ADDR_VA, (void *)start_map, PAGE_SIZE); 
-        int *check_1 = (int *)COPY_ADDR_VA;
-        int *check_2 = (int *)start_map;
-        for(int i = 0; i < 1024; i++){
-            assert(check_1[i] == check_2[i]);
-        }
+        memmove((void *)COPY_ADDR_VA, (void *)start_map, PAGE_SIZE);
         if (add_frame((unsigned int)start_map, (unsigned int)new_frame,
-         copy_to, USER_PD_FLAG, USER_PT_FLAG) < 0)
+                      copy_to, USER_PD_FLAG, USER_PT_FLAG) < 0)
         {
             lprintf("VA FAIL: %x, PHYS FAIL: %x", (unsigned int)start_map, (unsigned int)new_frame);
             panic("add frame did not work");
@@ -266,4 +279,57 @@ void *clone_page_directory(void *old_pd)
     return (void *)copy_to;
 }
 
-//disassemble 0x0100138e
+/* Check present and supervisor flags */
+int check_vaddr(void *addr)
+{
+    if (in_user_mem < 0)
+        return -1;
+    unsigned int page = addr & PAGE_MASK;
+    int flags = PRESENT_BIT_MASK | SUPERVISOR_BIT_MASK; // Address does not need to be writable
+    pde *pd = (pde *)get_cr3();
+    if (pd & PRESENT_BIT_MASK)
+    {
+        pte *page_table = pd[get_pd_index(addr)];
+        if (page_table[get_pt_index(addr)] & flags)
+            return 0;
+    }
+
+    return -1;
+}
+
+int validate_string(char *string)
+{
+    // assuming all strings end with null terminator
+    int len = 0;
+    while (check_vaddr(string + len) == 0)
+    {
+        len++;
+        if (string[len] == '\0')
+            return len;
+    }
+    return -1;
+}
+
+int validate_string_array(char *string_arr[])
+{
+    int len = 0;
+    while (check_vaddr(string_arr + len) == 0)
+    {
+        if (string_arr[len] == NULL)
+            return len;
+        if (validate_string(string_arr[len]) >= 0)
+            len++;
+        else
+            return -1
+    }
+    return -2;
+}
+
+int in_user_mem(unsigned int addr)
+{
+    if (addr > USER_MEM_END)
+        return -1;
+    if (addr < USER_MEM_START)
+        return -2;
+    return 0;
+}

@@ -68,12 +68,6 @@ void context_tickback(unsigned int tick)
 
 void add_to_run_queue(tcb_t *tcb, int is_new_thread)
 {
-    // thread_obj_t *new_thread = malloc(sizeof(thread_obj_t));
-    // new_thread->tcb = tcb;
-    // new_thread->tid = tcb->tid;
-    // new_thread->next = NULL;
-    // new_thread->prev = NULL;
-    // new_thread->new_thread = is_new_thread;
     tcb->next = NULL;
     tcb->next = NULL;
     tcb->new_thread = is_new_thread;
@@ -82,6 +76,17 @@ void add_to_run_queue(tcb_t *tcb, int is_new_thread)
     assert(run_queue_head);
 }
 
+/**
+ * @brief Switches by taking the first thread off the queue
+ *        (for round robin), storing current thread info on stack
+ *        and leading the new thread's esp changing page directories (if needed)
+ *
+ *        Note no changes to eip need to be made as all threads will switch
+ *        in this function.
+ *
+ *
+ * @param tid
+ */
 void context_switch(int tid)
 {
     if (context_enable == 0)
@@ -100,40 +105,31 @@ void context_switch(int tid)
     we can do set_cr3 and then pusha etc. because kernel stack is always in kernel space
     Consider the new thread case as it won't have stuff on its stack for registers
     */
-    // if (tid == -1)
-    // {
-    //     tid = kernel_gettid();
-    // }
 
-    // MAGIC_BREAK;
-
-    //tcb_t *current_thread = find_thread(run_queue_head, run_queue_tail, tid);
+    // Need to change tid logic before uncommenting these lines
+    // tcb_t *current_thread = find_thread(run_queue_head, run_queue_tail, tid);
     tcb_t *cur_tcb = get_tcb();
     // assert(!current_thread);
-
-    tcb_t *to_switch = run_queue_head;
 
     // add current thread to runnable queue and remove head of queue
     // (since round robin) as the next thread to execute.
     insert_thread(&run_queue_head, &run_queue_tail, cur_tcb);
+    tcb_t *to_switch = run_queue_head;
     remove_thread(&run_queue_head, &run_queue_tail, run_queue_head);
 
     // void *save_stack = cur_tcb->esp;
 
     assert(to_switch->pcb->page_directory);
 
-    // if (cur_tcb->tid == to_switch->tid)
-    // {
-    //     lprintf("thread %d will not switch\n", cur_tcb->tid);
-    //     return;
-    // }
-    MAGIC_BREAK;
+    if (cur_tcb->pcb->pid == to_switch->pcb->pid && cur_tcb->tid == to_switch->tid)
+    {
+        lprintf("thread %d will not switch\n", cur_tcb->tid);
+        return;
+    }
     set_cr3((uint32_t)to_switch->pcb->page_directory);
-    lprintf("CR3 has been set");
-    MAGIC_BREAK;
     set_esp0((uint32_t)to_switch->kernel_stack); // should this be tcb->esp instead?
 
-    lprintf("switching to new thread %d from %d! \n", to_switch->tid, cur_tcb->tid);
+    lprintf("switching to new thread %d pid %d from %d pid %d! \n", to_switch->tid, to_switch->pcb->pid, cur_tcb->tid, cur_tcb->pcb->pid);
     if (to_switch->new_thread)
     {
         to_switch->new_thread = 0; // set thread to old
@@ -141,7 +137,6 @@ void context_switch(int tid)
     }
     else
     {
-        MAGIC_BREAK;
         finish_switch(&cur_tcb->esp, to_switch->esp);
     }
 }

@@ -18,8 +18,9 @@ DEF_TEST_NAME("exec_basic:");
 
 int main()
 {
+  MAGIC_BREAK;
   REPORT_MISC("exec_basic_helper main() starting...");
   REPORT_END_SUCCESS;
- 
+
   exit(1);
 }
