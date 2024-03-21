@@ -14,11 +14,11 @@
 typedef struct mut_node_s 
 {
     int tid;
-    mut_node_s* next;
-    mut_node_s* prev;
+    struct mut_node_s* next;
+    struct mut_node_s* prev;
 }mut_node_t;
 
-typedef struct mut_queue_t
+typedef struct mut_queue_s
 {
     mut_node_t* head;
     mut_node_t* tail;
@@ -38,5 +38,7 @@ int queue_destroy(mut_queue_t* queue);
 int add_queue(int tid, mut_queue_t* queue);
 
 int remove_queue(mut_queue_t* queue);
+
+int queue_is_empty(mut_queue_t* queue);
 
 #endif /* _LIST_HELPER_H */

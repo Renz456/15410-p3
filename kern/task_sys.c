@@ -120,7 +120,7 @@ int kernel_exec(char *execname, char *argvec[])
   }
 
   int argc;
-  if (argc = validate_string_array(argvec) < 0)
+  if ((argc = validate_string_array(argvec)) < 0)
   {
     return -2;
   }

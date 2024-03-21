@@ -1,3 +1,5 @@
+#include <simics.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <synchronization/list_helper.h>
 
@@ -44,6 +46,7 @@ int mutex_unlock(mutex_t* mutex){
         // resume context switching
     }else{
         int switch_tid = remove_queue(&mutex->wait_queue);
+        switch_tid += 1;
         // remove this person from the sleep queue
         // enable context switching
         // ^^ need to also do this atomically
@@ -52,7 +55,7 @@ int mutex_unlock(mutex_t* mutex){
 }
 
 int mutex_destroy(mutex_t* mutex){
-    assert(mutex != NULL && queue_is_empty(mutex->wait_queue));
+    assert(mutex != NULL && queue_is_empty(&mutex->wait_queue));
     int err_val = queue_destroy(&mutex->wait_queue);
     free(mutex);
     return err_val;

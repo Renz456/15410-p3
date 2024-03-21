@@ -92,3 +92,11 @@ flush_page_entry:
     INVLPG (%eax)
     ret
 
+.global atomic_increment
+atomic_increment:
+    pushl %ecx
+    movl  8(%esp), %ecx  /* load input */
+    movl  $1, %eax
+    lock xadd %eax, (%ecx) /* eax = ecx, ecx += 1 */
+    popl %ecx
+    ret 

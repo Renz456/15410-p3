@@ -38,5 +38,8 @@ void *get_frame_addr();
 int new_pages(void *addr, int len);
 int align_pages(void *addr, int size);
 void *clone_page_directory(void *old_pd);
+int validate_string(char *string);
+int validate_string_array(char *string_arr[]);
+
 
 #endif /* _VM_H */

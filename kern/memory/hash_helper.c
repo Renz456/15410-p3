@@ -14,6 +14,7 @@
 #include <simics.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 #include <memory/hash_helper.h>
 
 /**
@@ -74,7 +75,7 @@ int hash_func(unsigned int key)
  * @param thread node which is to be inserted into the hashtable
  * @param hash_tb the hashtable where the node will be inserted
  */
-void insert_thread(vm_hash_node_t *thread, hashtable *hash_tb)
+void insert_addr_thread(vm_hash_node_t *thread, hashtable *hash_tb)
 {
     affirm(hash_tb != NULL);
     affirm(thread != NULL);
@@ -97,7 +98,7 @@ void insert_thread(vm_hash_node_t *thread, hashtable *hash_tb)
  * @param thread : Pointer to the thread node to be inserted into the hashtable
  * @param hash_tb : Pointer to the Hashtable where the node is to be inserted
  */
-void remove_thread(vm_hash_node_t *thread, hashtable *hash_tb)
+void remove_addr_thread(vm_hash_node_t *thread, hashtable *hash_tb)
 {
     int index = hash_func((unsigned int)thread->addr);
     vm_hash_node_t *start = hash_tb->table[index];

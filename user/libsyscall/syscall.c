@@ -112,11 +112,11 @@ int set_cursor_pos(int row, int col)
 	return -1;
 }
 
-// void halt(void)
-// {
-// 	while (1)
-// 		++placate_the_compiler;
-// }
+void halt(void)
+{
+	while (1)
+		++placate_the_compiler;
+}
 
 int readfile(char *filename, char *buf, int count, int offset)
 {
@@ -138,10 +138,10 @@ void task_vanish(int status)
 // 	return -1;
 // }
 
-int remove_pages(void *addr)
-{
-	return -1;
-}
+// int remove_pages(void *addr)
+// {
+// 	return -1;
+// }
 
 unsigned int get_ticks(void)
 {

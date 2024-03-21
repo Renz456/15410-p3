@@ -1,10 +1,15 @@
 #include <stdlib.h>
 #include <synchronization/list_helper.h>
+#include <assert.h>
 
 int queue_init(mut_queue_t* queue){
+    if(queue == NULL){
+        return -1;
+    }
     queue->size = 0;
     queue->head = NULL;
     queue->tail = NULL;
+    return 0;
 }
 
 int queue_destroy(mut_queue_t* queue){
@@ -38,14 +43,14 @@ int add_queue(int tid, mut_queue_t* queue){
 int remove_queue(mut_queue_t* queue){
     assert(queue != NULL && queue->size > 0);
     int ret_val = queue->head->tid;
-    mut_queue_t* free_node = queue->head;
+    mut_node_t* free_node = queue->head;
     queue->head = queue->head->next;
     if(queue->head != NULL){
         queue->head->prev = NULL;
     }
     queue->size -= 1;
     free(free_node);
-    return 0;
+    return ret_val;
 }
 
 int queue_is_empty(mut_queue_t* queue){

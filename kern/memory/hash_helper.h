@@ -30,9 +30,9 @@ int init_hashtable(hashtable *hash_tb);
 
 int hash_func(unsigned int key);
 
-void insert_thread(vm_hash_node_t *thread, hashtable *hash_tb);
+void insert_addr_thread(vm_hash_node_t *thread, hashtable *hash_tb);
 
-void remove_thread(vm_hash_node_t *thread, hashtable *hash_tb);
+void remove_addr_thread(vm_hash_node_t *thread, hashtable *hash_tb);
 
 vm_hash_node_t *get_thread(unsigned int addr, hashtable *hash_tb);
 

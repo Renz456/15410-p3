@@ -29,8 +29,16 @@ frame_node_t* head = NULL;
 
 void *frame_curr = (void *)USER_MEM_START;
 
-void* get_physical_address(void* pt_entry){
-    return (void *)((unsigned int)pt_entry & ~TWELVE_BIT_MASK);
+// Top 
+void *get_physical_address(void *pt_entry){
+    return (void *)((unsigned int)pt_entry & ~TWELVE_BIT_MASK); 
+    // This needs to be a 12 bit mask, check handout
+}
+
+// This makes sense right??
+void set_not_present(pte pt_entry){
+    pt_entry = (pte)(0);
+    return;
 }
 
 /// @brief 
@@ -98,7 +106,7 @@ void *remove_frame(unsigned int virtual_address, pde *pd_start){
     }
 
     void* free_frame = get_physical_address((void *)pt_start[pt_idx]);
-    set_not_present((void *)pt_start[pt_idx]);
+    set_not_present(pt_start[pt_idx]);
 
     return free_frame;
 }
@@ -223,7 +231,7 @@ int new_pages(void *addr, int len)
     }
     new_node->addr = addr;
     new_node->num_pages = num_pages;
-    insert_thread(new_node, &hash_tb); // insert virtual address with the amount of pages it took also
+    insert_addr_thread(new_node, &hash_tb); // insert virtual address with the amount of pages it took also
     return 0;
 }
 
@@ -237,7 +245,7 @@ int remove_pages(void *addr){
     vm_hash_node_t *retrieve_node = get_thread((unsigned int)addr, &hash_tb);
     int num_pages = retrieve_node->num_pages;
     //void* start_addr = retrieve_node->addr;
-    remove_thread(retrieve_node, &hash_tb); //Remove thread from hash_tb
+    remove_addr_thread(retrieve_node, &hash_tb); //Remove thread from hash_tb
     unsigned int start = (unsigned int)addr;
     for(unsigned int start_addr = start; start_addr < (start + (PAGE_SIZE*num_pages)); start_addr += PAGE_SIZE){
         void* frame_addr = remove_frame(start_addr, (pde *)((void *)(get_cr3)));

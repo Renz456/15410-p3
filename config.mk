@@ -103,8 +103,7 @@ UPDATE_METHOD = afs
 # A list of the test programs you want compiled in from the 410user/progs
 # directory.
 #
-410TESTS = getpid_test1 ck1 loader_test1 loader_test2 fork_test1 knife \
-		exec_basic exec_basic_helper exec_nonexist halt_test
+410TESTS = getpid_test1 ck1 loader_test1 loader_test2 fork_test1
 
 ###########################################################################
 # Test programs you have written which you wish to run
@@ -146,7 +145,8 @@ THREAD_OBJS = malloc.o panic.o
 ###########################################################################
 # Object files for your syscall wrappers
 ###########################################################################
-SYSCALL_OBJS = syscall.o gettid.o new_pages.o fork.o exec.o halt.o
+SYSCALL_OBJS = syscall.o gettid.o new_pages.o fork.o exec.o new_pages.o halt.o \
+
 
 ###########################################################################
 # Object files for your automatic stack handling
@@ -166,7 +166,8 @@ AUTOSTACK_OBJS = autostack.o
 KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o interrupts/fault_asm_wrappers.o \
 			  interrupts/interupt.o asm_helpers.o task.o gettid_wrapper.o interrupts/handler.o thread.o \
 			  memory/virtual_mem.o hardware/timer.o hardware/keyboard.o scheduler.o thread_obj.o \
-			  fork_wrapper.o task_sys.o exec_wrapper.o halt_wrapper.o
+			  fork_wrapper.o task_sys.o memory/hash_helper.o synchronization/list_helper.o synchronization/mutex_kern.o \
+			  halt_wrapper.o exec_wrapper.o
 
 
 ###########################################################################
