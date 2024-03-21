@@ -21,13 +21,24 @@
 #include <inc/kern_constants.h>
 #include <vm.h>
 #include <simics.h>
-#include <inc/asm_helpers.h>
+#include <memory/hash_helper.h>
+
+hashtable hash_tb;
+frame_node_t* head = NULL;
 
 void *frame_curr = (void *)USER_MEM_START;
 
-/// @brief 
-/// @param entry 
-/// @return 
+// Top 
+void *get_physical_address(void *pt_entry){
+    return (void *)((unsigned int)pt_entry & ~TWELVE_BIT_MASK); // This needs to be a 12 bit mask, check handout
+}
+
+// This makes sense right??
+void set_not_present(pte pt_entry){
+    pt_entry = (pte)(0);
+    return;
+}
+
 int get_pt_index(void *entry)
 {
     return (((unsigned int)entry >> 12) & TEN_BIT_MASK);
@@ -70,15 +81,33 @@ pde *create_new_pd()
     return pd_new;
 }
 
-/// @brief 
-/// @param virtual_address 
-/// @param physical_address 
-/// @param pd_start 
-/// @param pd_flags 
-/// @param pt_flags 
-/// @return 
-int add_frame(unsigned int virtual_address, unsigned int physical_address, 
-              pde *pd_start, int pd_flags, int pt_flags)
+void *remove_frame(unsigned int virtual_address, pde *pd_start){   
+    assert(pd_start != NULL);
+    unsigned int pd_idx = (unsigned int)get_pd_index((void *)virtual_address);
+    if (!check_present((void *)pd_start[pd_idx])) 
+    {
+        // Directory is not present
+        lprintf("trying to remove page with non present directory");
+        return NULL;
+    }
+
+    pte *pt_start = (pte *)(pd_start[pd_idx] & CLEAR_BOTTOM);
+    int pt_idx = (unsigned int)get_pt_index((void *)virtual_address);
+
+    if (!check_present((void *)pt_start[pt_idx]))
+    {
+        lprintf("trying to remove page with non present page");
+        return NULL;
+    }
+
+    void* free_frame = get_physical_address((void *)pt_start[pt_idx]);
+    set_not_present((void *)pt_start[pt_idx]);
+
+    return free_frame;
+}
+
+// Need to check for flags
+int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *pd_start, int pd_flags, int pt_flags)
 {
     unsigned int pd_idx = (unsigned int)get_pd_index((void *)virtual_address);
     // Check if the pd_start[pd_idx] is present otherwise create
@@ -128,6 +157,7 @@ void map_kernel_space(pde *pd_start)
 void initialize_vm()
 {
     pde *pd_start = create_new_pd();
+    init_hashtable(&hash_tb);
     map_kernel_space(pd_start);
     set_cr3((unsigned int)pd_start);
     set_cr0(get_cr0() | CR0_PG | CR0_PE);
@@ -137,6 +167,11 @@ void initialize_vm()
 /// @return 
 void *get_frame_addr()
 {
+    void *ret_frame;
+    ret_frame = get_free_frame(head);
+    if(ret_frame != NULL){
+        return ret_frame;
+    }
     void *ret_frame = frame_curr;
     frame_curr += PAGE_SIZE;
     if ((unsigned int)ret_frame > machine_phys_frames() * PAGE_SIZE)
@@ -174,7 +209,6 @@ int new_pages(void *addr, int len)
         lprintf("User space trying to access kernel memory");
         return -2;
     }
-
     int num_pages = 0;
     for (unsigned int start = base_addr; start < base_addr + len; start += PAGE_SIZE)
     {
@@ -183,12 +217,36 @@ int new_pages(void *addr, int len)
         {
             panic("No more pages left to assign");
         }
-        if(add_frame(start, (unsigned int)frame_addr, (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG) < 0){
-            return -1;
-        }
-        num_pages++;
+        add_frame(start, (unsigned int)frame_addr, (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG);
+        num_pages += 1;
     }
-    lprintf("address %d pages at address %x", num_pages, (unsigned int)addr);
+    // lprintf("added page from %p to %p\n", addr, addr + len);
+    vm_hash_node_t *new_node = malloc(sizeof(vm_hash_node_t));
+    if(new_node == NULL){
+        return -1;
+    }
+    new_node->addr = addr;
+    new_node->num_pages = num_pages;
+    insert_thread(new_node, &hash_tb); // insert virtual address with the amount of pages it took also
+    return 0;
+}
+
+// Hashtable needs to contain virtual address -> len mapping
+int remove_pages(void *addr){
+    assert(addr != NULL);
+    if((unsigned int)addr < USER_MEM_START){
+        // Trying to remove kernel pages
+        return -1;
+    }
+    vm_hash_node_t *retrieve_node = get_thread((unsigned int)addr, &hash_tb);
+    int num_pages = retrieve_node->num_pages;
+    void* start_addr = retrieve_node->addr;
+    remove_thread(retrieve_node, &hash_tb); //Remove thread from hash_tb
+    unsigned int start = (unsigned int)addr;
+    for(unsigned int start_addr = start; start_addr < (start + (PAGE_SIZE*num_pages)); start_addr += PAGE_SIZE){
+        void* frame_addr = remove_frame(start_addr, (pde *)((void *)(get_cr3)));
+        add_free_frame(frame_addr, head);
+    }
     return 0;
 }
 
@@ -207,6 +265,7 @@ int align_pages(void *addr, int size)
     return new_pages((void *)addr_aligned, size_aligned);
 }
 
+// THIS NEEDS TO BE SQUASHED IN THE MERGE WITH CTX_SWITCH THIS IS WRONG
 /// @brief Clones a directory
 /// @param old_pd 
 /// @return 
