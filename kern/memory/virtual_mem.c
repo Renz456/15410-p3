@@ -22,11 +22,16 @@
 #include <vm.h>
 #include <simics.h>
 #include <memory/hash_helper.h>
+#include <inc/asm_helpers.h>
 
 hashtable hash_tb;
 frame_node_t* head = NULL;
 
 void *frame_curr = (void *)USER_MEM_START;
+
+void* get_physical_address(void* pt_entry){
+    return (void *)((unsigned int)pt_entry & ~TWELVE_BIT_MASK);
+}
 
 /// @brief 
 /// @param entry 
@@ -99,7 +104,8 @@ void *remove_frame(unsigned int virtual_address, pde *pd_start){
 }
 
 // Need to check for flags
-int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *pd_start, int pd_flags, int pt_flags)
+int add_frame(unsigned int virtual_address, unsigned int physical_address,
+             pde *pd_start, int pd_flags, int pt_flags)
 {
     unsigned int pd_idx = (unsigned int)get_pd_index((void *)virtual_address);
     // Check if the pd_start[pd_idx] is present otherwise create
@@ -107,17 +113,13 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *
     // Once both and creating then store frame in pd_start[pd_idx][pt_idx]
     // Need to read about the bottom 12 bit flags associated with both entries
     if (!check_present((void *)pd_start[pd_idx]))
-    // Checking if the directory is present or not, if not then we create it and set the PD flags
     {
         pde *new_page_table = create_new_pd();
-        // lprintf("check addr %x new pt %p\n", new_page_table[get_pt_index((void *)virtual_address)], new_page_table);
         // new_page_table = (pde *)set_flags(new_page_table, pd_flags);
         pd_start[pd_idx] = set_flags(new_page_table, pd_flags);
     }
     pte *pt_start = (pte *)(pd_start[pd_idx] & CLEAR_BOTTOM);
     int pt_idx = (unsigned int)get_pt_index((void *)virtual_address);
-
-    // lprintf("check pte %x check pt index %d ptstart %p\n", pt_start[pt_idx], pt_idx, pt_start);
 
     // void *page_table = (void *)(*(unsigned int *)(pd_start + pd_idx));
     if (check_present((void *)pt_start[pt_idx]) && virtual_address != (unsigned int)COPY_ADDR_VA)
@@ -165,7 +167,7 @@ void *get_frame_addr()
     if(ret_frame != NULL){
         return ret_frame;
     }
-    void *ret_frame = frame_curr;
+    ret_frame = frame_curr;
     frame_curr += PAGE_SIZE;
     if ((unsigned int)ret_frame > machine_phys_frames() * PAGE_SIZE)
     {
@@ -234,7 +236,7 @@ int remove_pages(void *addr){
     }
     vm_hash_node_t *retrieve_node = get_thread((unsigned int)addr, &hash_tb);
     int num_pages = retrieve_node->num_pages;
-    void* start_addr = retrieve_node->addr;
+    //void* start_addr = retrieve_node->addr;
     remove_thread(retrieve_node, &hash_tb); //Remove thread from hash_tb
     unsigned int start = (unsigned int)addr;
     for(unsigned int start_addr = start; start_addr < (start + (PAGE_SIZE*num_pages)); start_addr += PAGE_SIZE){
@@ -313,20 +315,29 @@ void *clone_page_directory(void *old_pd)
     return (void *)copy_to;
 }
 
+int in_user_mem(unsigned int addr)
+{
+    if (addr < USER_MEM_END)
+        return -1;
+    else return 0;
+}
+
 /* Check present and supervisor flags */
 int check_vaddr(void *addr)
 {
-    if (in_user_mem < 0)
+    if (in_user_mem((unsigned int)addr) < 0){
         return -1;
-    unsigned int page = addr & PAGE_MASK;
+
+    }
+    //unsigned int page = addr & PAGE_MASK;
     int flags = PRESENT_BIT_MASK | SUPERVISOR_BIT_MASK; // Address does not need to be writable
     pde *pd = (pde *)get_cr3();
-    if (pd & PRESENT_BIT_MASK)
-    {
-        pte *page_table = pd[get_pd_index(addr)];
-        if (page_table[get_pt_index(addr)] & flags)
-            return 0;
-    }
+    //if (pd & PRESENT_BIT_MASK)
+    //{
+    pte *page_table = (pte *)pd[get_pd_index(addr)];
+    if (page_table[get_pt_index(addr)] & flags)
+        return 0;
+    //}
 
     return -1;
 }
@@ -337,9 +348,9 @@ int validate_string(char *string)
     int len = 0;
     while (check_vaddr(string + len) == 0)
     {
-        len++;
         if (string[len] == '\0')
             return len;
+        len++;
     }
     return -1;
 }
@@ -351,19 +362,12 @@ int validate_string_array(char *string_arr[])
     {
         if (string_arr[len] == NULL)
             return len;
+        
         if (validate_string(string_arr[len]) >= 0)
             len++;
         else
-            return -1
+            return -1;
+    
     }
     return -2;
-}
-
-int in_user_mem(unsigned int addr)
-{
-    if (addr > USER_MEM_END)
-        return -1;
-    if (addr < USER_MEM_START)
-        return -2;
-    return 0;
 }

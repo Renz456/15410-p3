@@ -88,15 +88,7 @@ keyboard_wrapper:
 
 .global flush_page_entry
 flush_page_entry:
-    movl 4(%esp), %eax
+    mov 4(%esp), %eax
     INVLPG (%eax)
     ret
 
-.global atomic_increment
-atomic_increment:
-    pushl %ecx
-    movl  8(%esp), %ecx  /* load input */
-    movl  $1, %eax
-    lock xadd %eax, (%ecx) /* eax = ecx, ecx += 1 */
-    popl %ecx
-    ret 
