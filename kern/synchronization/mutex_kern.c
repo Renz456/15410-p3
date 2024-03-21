@@ -26,6 +26,7 @@ int mutex_lock(int tid, mutex_t* mutex){
         // disable interruprts
         // enable context switchiing
         // put ourselves on sleep que
+        // enable interrupts -> 
 
 
         // Put ourselves on sleep queue and wake up when unlocking
