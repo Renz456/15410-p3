@@ -29,10 +29,10 @@ volatile static int placate_the_compiler;
 // 	return -1;
 // }
 
-int exec(char *execname, char *argvec[])
-{
-	return -1;
-}
+// int exec(char *execname, char *argvec[])
+// {
+// 	return -1;
+// }
 
 void set_status(int status)
 {
@@ -112,11 +112,11 @@ int set_cursor_pos(int row, int col)
 	return -1;
 }
 
-void halt(void)
-{
-	while (1)
-		++placate_the_compiler;
-}
+// void halt(void)
+// {
+// 	while (1)
+// 		++placate_the_compiler;
+// }
 
 int readfile(char *filename, char *buf, int count, int offset)
 {

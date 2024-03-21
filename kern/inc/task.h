@@ -25,12 +25,12 @@ typedef struct pcb
 typedef struct entry_args
 {
     int argc;
-    char *argv;
+    char **argv;
     void *stack_high;
     void *stack_low;
 } crt0_main_t;
 
 pcb_t *create_pcb(void *page_directory);
-void *init_task(pcb_t *pcb);
+void *init_task(pcb_t *pcb, char **argv, int argc);
 
 #endif /* _TASK_H */

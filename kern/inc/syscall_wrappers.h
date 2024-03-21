@@ -8,13 +8,16 @@
  *
  */
 
-#ifndef _GETTID_WRAP_H
-#define _GETTID_WRAP_H
+#ifndef _SYSCALL_WRAP_H
+#define _SYSCALL_WRAP_H
 
 /**
  * @brief Get the tid wrapper object
  *
  */
 void gettid_wrapper(void);
+void fork_wrapper(void);
+void exec_wrapper(void);
+void halt_wrapper(void);
 
-#endif /* _GETTID_WRAP_H */
+#endif /* _SYSCALL_WRAP_H */

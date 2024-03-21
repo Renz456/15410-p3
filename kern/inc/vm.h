@@ -25,6 +25,7 @@ typedef unsigned int pde;
 #define USER_PT_FLAG 0b000000000111
 #define CLEAR_BOTTOM 0xFFFFF000
 #define PRESENT_BIT_MASK 0x1
+#define SUPERVISOR_BIT_MASK 0x4
 
 #define COPY_ADDR_VA 0x0f000000
 
