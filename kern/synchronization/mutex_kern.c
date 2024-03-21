@@ -23,6 +23,11 @@ int mutex_lock(int tid, mutex_t* mutex){
         // enable context switching
     }else{
         add_queue(tid, &mutex->wait_queue);
+        // disable interruprts
+        // enable context switchiing
+        // put ourselves on sleep que
+
+
         // Put ourselves on sleep queue and wake up when unlocking
         // enable context switching
         // ^^ need a way to do this atomically
