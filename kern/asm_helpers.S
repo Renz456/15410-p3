@@ -82,7 +82,7 @@ timer_wrapper:
 .global  keyboard_wrapper
 keyboard_wrapper:
     pusha
-    call keyboard_interupt_handler
+    /* call keyboard_interupt_handler */
     popa
     IRET
 

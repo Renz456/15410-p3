@@ -20,5 +20,6 @@ void keyboard_interupt_handler();
 
 int readchar(void);
 int readline(char *buf, int len);
+void install_keyboard();
 
 #endif /* _KEYBOARD_H */

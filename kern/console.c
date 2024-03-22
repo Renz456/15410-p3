@@ -22,8 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <p1kern.h>
 #include <asm.h>
+#include <video_defines.h>
+#include <console.h>
+#include <assert.h>
 
 // Global constants to keep track of cursor position,
 // status and terminal colour

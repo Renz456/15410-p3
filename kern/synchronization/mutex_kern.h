@@ -9,7 +9,10 @@
  *
  */
 
-#include <list_helper.h>
+#ifndef _MUTEX_KERN_H
+#define _MUTEX_KERN_H
+
+#include <synchronization/list_helper.h>
 
 typedef struct mutex
 {
@@ -22,3 +25,5 @@ int mutex_init(mutex_t *mp);
 int mutex_lock(int tid, mutex_t *mutex);
 int mutex_unlock(mutex_t *mutex);
 int mutex_destroy(mutex_t *mutex);
+
+#endif /* _MUTEX_KERN_H */

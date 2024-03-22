@@ -164,11 +164,12 @@ AUTOSTACK_OBJS = autostack.o
 #
 # Kernel object files you provide in from kern/
 #
-KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o interrupts/fault_asm_wrappers.o \
-			  interrupts/interupt.o asm_helpers.o task.o sycall_wrappers_asm/gettid_wrapper.o interrupts/handler.o thread.o \
-			  memory/virtual_mem.o hardware/timer.o hardware/keyboard.o scheduler.o thread_obj.o \
-			  sycall_wrappers_asm/fork_wrapper.o task_sys.o memory/hash_helper.o synchronization/list_helper.o synchronization/mutex_kern.o \
-			  sycall_wrappers_asm/halt_wrapper.o sycall_wrappers_asm/exec_wrapper.o sycall_wrappers_asm/new_pages_wrapper.o
+KERNEL_OBJS = console.o kernel.o loader.o malloc_wrappers.o interrupts/fault_asm_wrappers.o \
+			  interrupts/interupt.o asm_helpers.o task.o syscall_wrappers_asm/gettid_wrapper.o interrupts/handler.o thread.o \
+			  memory/virtual_mem.o hardware/timer.o scheduler.o thread_obj.o \
+			  syscall_wrappers_asm/fork_wrapper.o task_sys.o memory/hash_helper.o synchronization/list_helper.o synchronization/mutex_kern.o \
+			  syscall_wrappers_asm/halt_wrapper.o syscall_wrappers_asm/exec_wrapper.o syscall_wrappers_asm/new_pages_wrapper.o \
+			#   synchronization/cvar_kern.o hardware/keyboard.o
 
 
 ###########################################################################

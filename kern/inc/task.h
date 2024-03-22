@@ -20,6 +20,9 @@ typedef struct pcb
     // address space info
     void *page_directory;
     int num_threads;
+
+    struct pcb *next;
+    struct pcb *prev;
 } pcb_t;
 
 typedef struct entry_args

@@ -259,6 +259,7 @@ int new_pages(void *addr, int len)
         num_pages += 1;
     }
     // lprintf("added page from %p to %p\n", addr, addr + len);
+    lprintf("%d many pages alloced for %p\n", num_pages, addr);
     vm_hash_node_t *new_node = malloc(sizeof(vm_hash_node_t));
     if (new_node == NULL)
     {
