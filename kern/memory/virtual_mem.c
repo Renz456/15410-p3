@@ -80,6 +80,8 @@ int check_addr_present(void *virtual_address)
 {
     pde *pd_start = (pde *)get_cr3();
     unsigned int pd_idx = (unsigned int)get_pd_index((void *)virtual_address);
+    if (!check_present((void *)pd_start[pd_idx]))
+        return 0;
     pte *pt_start = (pte *)(pd_start[pd_idx] & CLEAR_BOTTOM);
     int pt_idx = (unsigned int)get_pt_index((void *)virtual_address);
 
@@ -234,12 +236,12 @@ int new_pages(void *addr, int len)
 
     int num_pages = 0;
 
-    // for (unsigned int start = base_addr; start < base_addr + len;
-    //      start += PAGE_SIZE)
-    // {
-    //     if (check_addr_present((void *)start))
-    //         return -1;
-    // }
+    for (unsigned int start = base_addr; start < base_addr + len;
+         start += PAGE_SIZE)
+    {
+        if (check_addr_present((void *)start))
+            return -1;
+    }
 
     for (unsigned int start = base_addr; start < base_addr + len;
          start += PAGE_SIZE)
