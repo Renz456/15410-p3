@@ -17,6 +17,8 @@
 typedef struct tcb
 {
     int tid;
+    int is_runnable;
+    int new_thread;
     // void *stack_high;
     // void *stack_low;
     void *kernel_stack;
@@ -30,7 +32,6 @@ typedef struct tcb
 
     struct tcb *next;
     struct tcb *prev;
-    int new_thread;
 } tcb_t;
 
 typedef struct usr_state

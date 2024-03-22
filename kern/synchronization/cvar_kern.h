@@ -1,5 +1,5 @@
 /**
- * @file mutex_kern.h
+ * @file cvar_kern.h
  * @author your name (you@domain.com)
  * @brief
  * @version 0.1
@@ -9,16 +9,17 @@
  *
  */
 
+#include <mutex_kern.h>
 #include <list_helper.h>
 
+/**
+ * @brief
+ *
+ */
 typedef struct mutex
 {
     int locked;
     int tid;
-    mut_queue_t wait_queue;
-} mutex_t;
-
-int mutex_init(mutex_t *mp);
-int mutex_lock(int tid, mutex_t *mutex);
-int mutex_unlock(mutex_t *mutex);
-int mutex_destroy(mutex_t *mutex);
+    mutex_t mutex;
+    mut_queue_t *wait_queue;
+} cond_t;

@@ -22,9 +22,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <p1kern.h>
 #include <asm.h>
-#include <syscall.h>
-#include <video_defines.h>
 
 // Global constants to keep track of cursor position,
 // status and terminal colour
@@ -241,7 +240,6 @@ int set_cursor(int row, int col)
 
 int print(int size, char *buf)
 {
-    /* Do i need to block stuffs? */
     if (size <= 0 || buf == NULL)
         return -1;
     putbytes(buf, size);

@@ -32,7 +32,7 @@
 #include <inc/scheduler.h>
 #include <inc/kern_constants.h>
 
-#define STARTING_FILE "halt_test"
+#define STARTING_FILE "new_pages"
 
 volatile static int __kernel_all_done = 0;
 

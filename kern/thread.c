@@ -51,7 +51,7 @@ tcb_t *create_tcb(pcb_t *pcb)
     tcb->kernel_stack = kernel_stack_high - 2 * PTR_SIZE;
     tcb->pcb = pcb;
     tcb->new_thread = 0;
-
+    tcb->is_runnable = 1;
     // tcb->stack_high = stack;
     // tcb->stack_low = stack - KERNEL_PAGE_SIZE;
 

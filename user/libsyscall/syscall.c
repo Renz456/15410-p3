@@ -21,6 +21,7 @@
  */
 
 #include <syscall.h>
+#include <simics.h>
 
 volatile static int placate_the_compiler;
 
@@ -127,7 +128,7 @@ void task_vanish(int status)
 {
 	status ^= status;
 	status /= status;
-
+	MAGIC_BREAK;
 	/* won't get here */
 	while (1)
 		++placate_the_compiler;

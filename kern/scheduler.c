@@ -18,6 +18,7 @@
 #include <asm_helpers.h>
 #include <inc/scheduler.h>
 #include <assert.h>
+#include <interrupt_defines.h>
 
 int context_enable = 0;
 
@@ -33,6 +34,8 @@ tcb_t *run_queue_head;
 tcb_t *run_queue_tail;
 tcb_t *sleep_queue_head;
 tcb_t *sleep_queue_tail;
+tcb_t *wait_queue_head;
+tcb_t *wait_queue_tail;
 // do I need a block queue???
 
 void initialise_scheduler()
@@ -42,6 +45,8 @@ void initialise_scheduler()
     run_queue_tail = NULL;
     sleep_queue_head = NULL;
     sleep_queue_tail = NULL;
+    wait_queue_head = NULL;
+    wait_queue_tail = NULL;
     // current_thread = NULL;
     return;
 }
@@ -76,6 +81,62 @@ void add_to_run_queue(tcb_t *tcb, int is_new_thread)
     assert(run_queue_head);
 }
 
+int kernel_yield(int tid)
+{
+    context_switch(tid);
+    outb(INT_CTL_PORT, INT_ACK_CURRENT);
+
+    /* DO WE NEED SPECIAL CASING? */
+    // if (tid == -1)
+    // {
+    //     context_switch(tid);
+    //     outb(INT_CTL_PORT, INT_ACK_CURRENT);
+    // }
+    // else
+    // {
+    // }
+}
+
+/**
+ * @brief
+ *
+ * @param tid
+ * @param reject
+ * @return int
+ */
+int kernel_deschedule(int tid, int *reject)
+{
+    disable_interrupts();
+    if (reject == NULL || *reject != 0)
+    {
+        return -1;
+    }
+
+    /* will need to add to blocked/ sleep queue and yield */
+    tcb_t *tcb = get_tcb();
+    tcb->is_runnable = 0;
+    insert_thread(&wait_queue_head, &wait_queue_tail, tcb);
+    enable_interrupts();
+    int result = kernel_yield(-1);
+    return result;
+}
+
+/**
+ * @brief THIS IS NOT THREAD SAFE
+ *
+ * @param tid
+ * @return int
+ */
+int kernel_make_runnable(int tid)
+{
+    tcb_t *tcb = find_thread(&wait_queue_head, &wait_queue_tail, tid);
+    if (!tcb)
+        return -1;
+
+    add_to_run_queue(tcb, 0);
+    return 0;
+}
+
 /**
  * @brief Switches by taking the first thread off the queue
  *        (for round robin), storing current thread info on stack
@@ -83,8 +144,7 @@ void add_to_run_queue(tcb_t *tcb, int is_new_thread)
  *
  *        Note no changes to eip need to be made as all threads will switch
  *        in this function.
- *        Note2 yield will probs be the only other function that calls this,
- *        we will have to send a timer ack when it does.
+ *
  *
  * @param tid
  */
@@ -114,9 +174,15 @@ void context_switch(int tid)
 
     // add current thread to runnable queue and remove head of queue
     // (since round robin) as the next thread to execute.
-    insert_thread(&run_queue_head, &run_queue_tail, cur_tcb);
-    tcb_t *to_switch = run_queue_head;
-    remove_thread(&run_queue_head, &run_queue_tail, run_queue_head);
+    if (tcb->is_runnable)
+        insert_thread(&run_queue_head, &run_queue_tail, cur_tcb);
+
+    tcb_t *to_switch = find_thread(&run_queue_head, &run_queue_tail, tid);
+    if (!to_switch)
+    {
+        to_switch = run_queue_head;
+    }
+    remove_thread(&run_queue_head, &run_queue_tail, to_switch);
 
     // void *save_stack = cur_tcb->esp;
 

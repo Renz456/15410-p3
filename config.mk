@@ -103,7 +103,8 @@ UPDATE_METHOD = afs
 # A list of the test programs you want compiled in from the 410user/progs
 # directory.
 #
-410TESTS = getpid_test1 ck1 loader_test1 loader_test2 fork_test1
+410TESTS = getpid_test1 ck1 loader_test1 loader_test2 fork_test1 new_pages \
+		   
 
 ###########################################################################
 # Test programs you have written which you wish to run
@@ -164,10 +165,10 @@ AUTOSTACK_OBJS = autostack.o
 # Kernel object files you provide in from kern/
 #
 KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o interrupts/fault_asm_wrappers.o \
-			  interrupts/interupt.o asm_helpers.o task.o gettid_wrapper.o interrupts/handler.o thread.o \
+			  interrupts/interupt.o asm_helpers.o task.o sycall_wrappers_asm/gettid_wrapper.o interrupts/handler.o thread.o \
 			  memory/virtual_mem.o hardware/timer.o hardware/keyboard.o scheduler.o thread_obj.o \
-			  fork_wrapper.o task_sys.o memory/hash_helper.o synchronization/list_helper.o synchronization/mutex_kern.o \
-			  halt_wrapper.o exec_wrapper.o
+			  sycall_wrappers_asm/fork_wrapper.o task_sys.o memory/hash_helper.o synchronization/list_helper.o synchronization/mutex_kern.o \
+			  sycall_wrappers_asm/halt_wrapper.o sycall_wrappers_asm/exec_wrapper.o sycall_wrappers_asm/new_pages_wrapper.o
 
 
 ###########################################################################
