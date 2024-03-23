@@ -23,11 +23,13 @@ typedef unsigned int pde;
 
 #define USER_PD_FLAG 0b000000000111
 #define USER_PT_FLAG 0b000000000111
+#define USER_PT_FLAG_INITIAL 0b000000000101
 #define CLEAR_BOTTOM 0xFFFFF000
 #define PRESENT_BIT_MASK 0x1
 #define SUPERVISOR_BIT_MASK 0x4
 
 #define COPY_ADDR_VA 0x0f000000
+#define ZFOD_ADDR_PA 0x0f100000
 
 int add_frame(unsigned int virtual_address, unsigned int physical_address, pde *pd_start, int pd_flags, int pt_flags);
 void map_kernel_space(pde *pd_start);
@@ -40,6 +42,6 @@ int align_pages(void *addr, int size);
 void *clone_page_directory(void *old_pd);
 int validate_string(char *string);
 int validate_string_array(char *string_arr[]);
-
+void *get_physical(unsigned int virtual_address, pde *pd_start);
 
 #endif /* _VM_H */

@@ -99,6 +99,30 @@ pde *create_new_pd()
     return pd_new;
 }
 
+void *get_physical(unsigned int virtual_address, pde *pd_start)
+{
+    assert(pd_start != NULL);
+    unsigned int pd_idx = (unsigned int)get_pd_index((void *)virtual_address);
+    if (!check_present((void *)pd_start[pd_idx]))
+    {
+        lprintf("trying to get PA of a page whose directory doesn't exist");
+        return NULL;
+    }
+
+    pte *pt_start = (pte *)(pd_start[pd_idx] & CLEAR_BOTTOM);
+    int pt_idx = (unsigned int)get_pt_index((void *)virtual_address);
+
+    if (!check_present((void *)pt_start[pt_idx]))
+    {
+        lprintf("trying to get PA of a page with non present page");
+        return NULL;
+    }
+
+    void *ret_PA = get_physical_address((void *)pt_start[pt_idx]);
+
+    return ret_PA;
+}
+
 void *remove_frame(unsigned int virtual_address, pde *pd_start)
 {
     assert(pd_start != NULL);
@@ -176,8 +200,11 @@ void initialize_vm()
     pde *pd_start = create_new_pd();
     init_hashtable(&hash_tb);
     map_kernel_space(pd_start);
+    set_zero_page();
     set_cr3((unsigned int)pd_start);
     set_cr0(get_cr0() | CR0_PG | CR0_PE);
+    // Need to zero out ZFOF frame here also
+    // How to do, do we just assign a VA to it, use memset and then clear the page
 }
 
 /// @brief
@@ -190,6 +217,9 @@ void *get_frame_addr()
     {
         return ret_frame;
     }
+    if(frame_curr == ZFOD_ADDR_PA){
+        frame_curr += PAGE_SIZE;
+    }
     ret_frame = frame_curr;
     frame_curr += PAGE_SIZE;
     if ((unsigned int)ret_frame > machine_phys_frames() * PAGE_SIZE)
@@ -198,6 +228,13 @@ void *get_frame_addr()
         return NULL;
     }
     return ret_frame;
+}
+
+void set_zero_page(){
+    add_frame(USER_MEM_START, (unsigned int)ZFOD_ADDR_PA,
+              (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG);
+    memset(USER_MEM_START, 0, PAGE_SIZE);
+    remove_frame(USER_MEM_START, (pde *)((void *)get_cr3()));
 }
 
 /// @brief
@@ -244,14 +281,14 @@ int new_pages(void *addr, int len)
     for (unsigned int start = base_addr; start < base_addr + len;
          start += PAGE_SIZE)
     {
-        void *frame_addr = get_frame_addr();
-        if (frame_addr == NULL)
-        {
-            // panic("No more pages left to assign");
-            return -5;
-        }
+        void *frame_addr = ZFOD_ADDR_PA;
+        // if (frame_addr == NULL)
+        // {
+        //     // panic("No more pages left to assign");
+        //     return -5;
+        // }
         if (add_frame(start, (unsigned int)frame_addr,
-                      (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG) < 0)
+                      (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG_INITIAL) < 0)
         {
             lprintf("page already mapped, shouldnt reach here\n");
             return -1;
@@ -287,6 +324,9 @@ int remove_pages(void *addr)
     for (unsigned int start_addr = start; start_addr < (start + (PAGE_SIZE * num_pages)); start_addr += PAGE_SIZE)
     {
         void *frame_addr = remove_frame(start_addr, (pde *)((void *)(get_cr3)));
+        if((unsigned int)frame_addr == ZFOD_ADDR_PA){
+            continue;
+        }
         add_free_frame(frame_addr, head);
     }
     return 0;
@@ -337,23 +377,36 @@ void *clone_page_directory(void *old_pd)
             continue;
             // increment to next page
         }
-        void *new_frame = get_frame_addr();
-        // CHECK IF THIS WORKS V POSSIBLE IT DOESN'T
-        lprintf("yay new page has been mapped now VA ADDY: %x", (unsigned int)start_map);
-        if (add_frame((unsigned int)COPY_ADDR_VA, (unsigned int)new_frame,
-                      copy_from, USER_PD_FLAG, USER_PT_FLAG) < 0)
-        {
-            lprintf("Something wrong happened here");
+
+        unsigned int clone_PA = get_physical(start_map, copy_from);
+        
+        if(clone_PA == ZFOD_ADDR_PA){
+            if (add_frame(clone_PA, ZFOD_ADDR_PA,
+                        copy_to, USER_PD_FLAG, USER_PT_FLAG_INITIAL) < 0)
+            {
+                lprintf("page already mapped, shouldnt reach here\n");
+                return -1;
+            }
         }
-        flush_page_entry((unsigned int)COPY_ADDR_VA);
-        memmove((void *)COPY_ADDR_VA, (void *)start_map, PAGE_SIZE);
-        if (add_frame((unsigned int)start_map, (unsigned int)new_frame,
-                      copy_to, USER_PD_FLAG, USER_PT_FLAG) < 0)
-        {
-            lprintf("VA FAIL: %x, PHYS FAIL: %x",
-                    (unsigned int)start_map, (unsigned int)new_frame);
-            panic("add frame did not work");
-        } // should copy the actual flags but this should be fine for now
+        else{
+            void *new_frame = get_frame_addr();
+            // CHECK IF THIS WORKS V POSSIBLE IT DOESN'T
+            lprintf("yay new page has been mapped now VA ADDY: %x", (unsigned int)start_map);
+            if (add_frame((unsigned int)COPY_ADDR_VA, (unsigned int)new_frame,
+                        copy_from, USER_PD_FLAG, USER_PT_FLAG) < 0)
+            {
+                lprintf("Something wrong happened here");
+            }
+            flush_page_entry((unsigned int)COPY_ADDR_VA);
+            memmove((void *)COPY_ADDR_VA, (void *)start_map, PAGE_SIZE);
+            if (add_frame((unsigned int)start_map, (unsigned int)new_frame,
+                        copy_to, USER_PD_FLAG, USER_PT_FLAG) < 0)
+            {
+                lprintf("VA FAIL: %x, PHYS FAIL: %x",
+                        (unsigned int)start_map, (unsigned int)new_frame);
+                panic("add frame did not work");
+            } // should copy the actual flags but this should be fine for now
+        }
         pages_copied++;
         start_map += PAGE_SIZE;
     }
