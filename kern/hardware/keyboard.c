@@ -83,11 +83,16 @@ int readchar(void)
   return -1;
 }
 
-int readline(char *buf, int len)
+int readline(int len, char *buf)
 {
-  if (len <= 0 || len > KB_BUFF_SIZE)
-    return -1;
 
+  if (len <= 0 || len > KB_BUFF_SIZE)
+  {
+    lprintf("bad readline input len %d\n", len);
+    return -1;
+  }
+
+  lprintf("entering readline\n");
   char tmp_buf[len];
   int n = 0;
   int current_char = 0;

@@ -28,7 +28,7 @@ void timer_interupt_handler()
 
     // MAGIC_BREAK;
 
-    if (num_ticks % 500 == 0)
+    if (num_ticks % 50 == 0)
     {
         lprintf("A second has passed in thread %d!\n", get_tcb()->tid);
         // tickback(num_ticks);

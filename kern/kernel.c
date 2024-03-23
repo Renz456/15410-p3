@@ -32,7 +32,8 @@
 #include <inc/scheduler.h>
 #include <inc/kern_constants.h>
 
-#define STARTING_FILE "print_basic"
+#define STARTING_FILE "fork_test1"
+#define IDLE_FILE "idle"
 
 volatile static int __kernel_all_done = 0;
 
@@ -68,13 +69,12 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
 
     // init pcb?
     void *page_directory = (void *)get_cr3();
+    // void *idle_pd = clone_page_directory(page_directory);
     pcb_t *pcb = create_pcb(page_directory);
     void *stack = init_task(pcb, NULL, 0);
     // void *esp;
     lprintf("process actual start stack %p\n", stack);
     tcb_t *tcb = create_tcb(pcb);
-    // tcb_t *tcb_2 = create_tcb(pcb);
-    // void *stack_2 = init_task(pcb);
     lprintf("Hello from a brand new kernel!\n");
 
     int app_index = find_app_index(STARTING_FILE);
@@ -98,8 +98,25 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     }
 
     void *eip = (void *)se_hdr.e_entry;
-    // prepare_thread(tcb_2, stack_2, eip);
+
     lprintf("Entry addr %lx\n", se_hdr.e_entry);
+
+    // pde *idle_pd = malloc(sizeof(pde));
+
+    // set_cr3((unsigned int)idle_pd);
+    // pcb_t *idle_pcb = create_pcb(idle_pd);
+    // void *idle_stack = init_task(idle_pcb, NULL, 0);
+    // tcb_t *idle_tcb = create_tcb(idle_pcb);
+    // init_address_space(IDLE_FILE);
+    // simple_elf_t se_hdr_idle;
+    // if (elf_load_helper(&se_hdr_idle, STARTING_FILE) < 0)
+    // {
+    //     lprintf("this should not happen\n");
+    //     return -1;
+    // }
+    // prepare_thread(idle_tcb, idle_stack, (void *)se_hdr_idle.e_entry);
+    // set_cr3((uint32_t)page_directory);
+
     run_thread(tcb, stack, eip);
 
     lprintf("starting while loop\n");

@@ -21,6 +21,7 @@
  */
 typedef struct cond
 {
+    int valid;
     int locked;
     int tid;
     mutex_t mutex;
