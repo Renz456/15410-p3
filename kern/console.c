@@ -145,7 +145,7 @@ int putbyte(char ch)
 
 void putbytes(const char *s, int len)
 {
-    affirm(s == NULL || len <= 0);
+    affirm(s != NULL || len >= 0);
     for (int i = 0; i < len; i++)
         putbyte(s[i]);
 }

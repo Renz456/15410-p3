@@ -20,5 +20,6 @@ void fork_wrapper(void);
 void exec_wrapper(void);
 void halt_wrapper(void);
 void new_pages_wrapper(void);
+void print_wrapper(void);
 
 #endif /* _SYSCALL_WRAP_H */

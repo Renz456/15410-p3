@@ -43,6 +43,7 @@ void install_syscalls()
     create_idt_entry(exec_wrapper, USER_DPL, EXEC_INT);
     create_idt_entry(halt_wrapper, USER_DPL, HALT_INT);
     create_idt_entry(new_pages_wrapper, USER_DPL, NEW_PAGES_INT);
+    create_idt_entry(print_wrapper, USER_DPL, PRINT_INT);
 }
 
 /**
