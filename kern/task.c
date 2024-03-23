@@ -12,6 +12,8 @@
 #include <malloc.h>
 #include <assert.h>
 #include <simics.h>
+#include <synchronization/mutex_kern.h>
+#include <synchronization/cvar_kern.h>
 // #include <vm.h>
 
 #define TASK_PAGE_SIZE PAGE_SIZE
@@ -30,6 +32,15 @@ pcb_t *create_pcb(void *page_directory)
     pcb->stack_high = stack_high;
     pcb->stack_low = stack_low;
     pcb->pid = next_pid++;
+    pcb->parent = NULL;
+    pcb->child_list = NULL;
+    pcb->next = NULL;
+    pcb->prev = NULL;
+    if (mutex_init(&pcb->pcb_mp) < 0 || cond_init(&pcb->pcb_cv) < 0)
+    {
+        free(pcb);
+        return NULL;
+    }
     return pcb;
 }
 
@@ -67,4 +78,46 @@ static void *setup_main(void *stack_high, void *stack_low, char **argv, int argc
     args->stack_low = stack_low;
 
     return stack_high - sizeof(crt0_main_t) - PTR_SIZE;
+}
+
+void add_child(pcb_t **parent_list, pcb_t *child)
+{
+    assert(parent && child);
+    if (*parent_list == NULL)
+    {
+        *parent_list = child;
+        child->next = NULL;
+    }
+    else
+    {
+        (*parent_list)->prev = child;
+        child->next = *parent_list;
+        *parent_list = child;
+    }
+    child->prev = NULL;
+}
+
+void remove_child(pcb_t **parent_list, pcb_t *child)
+{
+    if (child->next == NULL && child->prev == NULL)
+    {
+        *parent_list = NULL;
+    }
+    else if (child->next == NULL)
+    {
+        (*parent_list) = (*parent_list)->prev;
+        (*parent_list)->next = NULL;
+    }
+    else if (child->prev == NULL)
+    {
+        (*parent_list) = (*parent_list)->next;
+        (*parent_list)->prev = NULL;
+    }
+    else
+    {
+        child->prev->next = child->next;
+        child->next->prev = child->prev;
+    }
+    child->next = NULL;
+    child->prev = NULL;
 }
