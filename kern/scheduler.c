@@ -201,11 +201,14 @@ void context_switch(int tid)
     lprintf("switching to new thread %d pid %d from %d pid %d! \n", to_switch->tid, to_switch->pcb->pid, cur_tcb->tid, cur_tcb->pcb->pid);
     if (to_switch->new_thread)
     {
-        to_switch->new_thread = 0; // set thread to old
+        to_switch->new_thread = 0;           // set thread to old
+        outb(INT_CTL_PORT, INT_ACK_CURRENT); // TODO THIS COULD BE A BOG
+        MAGIC_BREAK;
         new_switch(&cur_tcb->esp, to_switch->esp);
     }
     else
     {
+
         finish_switch(&cur_tcb->esp, to_switch->esp);
     }
 }

@@ -56,9 +56,5 @@ mut_node_t *remove_queue(mut_queue_t *queue)
 int queue_is_empty(mut_queue_t *queue)
 {
     assert(queue != NULL);
-    if (queue->size > 0)
-    {
-        return 1;
-    }
-    return 0;
+    return queue->size == 0;
 }

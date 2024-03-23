@@ -77,10 +77,10 @@ void install_timer()
 void install_hardware_interrupts()
 {
     install_timer();
-    // install_keyboard();
+    install_keyboard();
     set_tickback(context_tickback);
     create_idt_entry(timer_wrapper, KERNEL_DPL, TIMER_IDT_ENTRY);
-    // create_idt_entry(keyboard_wrapper, KERNEL_DPL, KEY_IDT_ENTRY);
+    create_idt_entry(keyboard_wrapper, KERNEL_DPL, KEY_IDT_ENTRY);
 }
 
 /**
