@@ -43,6 +43,7 @@ void install_syscalls()
     create_idt_entry(exec_wrapper, USER_DPL, EXEC_INT);
     create_idt_entry(halt_wrapper, USER_DPL, HALT_INT);
     create_idt_entry(new_pages_wrapper, USER_DPL, NEW_PAGES_INT);
+    create_idt_entry(remove_pages_wrapper, USER_DPL, REMOVE_PAGES_INT);
     create_idt_entry(print_wrapper, USER_DPL, PRINT_INT);
     create_idt_entry(readline_wrapper, USER_DPL, READLINE_INT);
     lprintf("readline %p\n", readline_wrapper);
@@ -77,10 +78,10 @@ void install_timer()
 void install_hardware_interrupts()
 {
     install_timer();
-    install_keyboard();
+    // install_keyboard();
     set_tickback(context_tickback);
     create_idt_entry(timer_wrapper, KERNEL_DPL, TIMER_IDT_ENTRY);
-    create_idt_entry(keyboard_wrapper, KERNEL_DPL, KEY_IDT_ENTRY);
+    // create_idt_entry(keyboard_wrapper, KERNEL_DPL, KEY_IDT_ENTRY);
 }
 
 /**
