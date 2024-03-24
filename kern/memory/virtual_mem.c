@@ -196,13 +196,22 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address,
 /// @param pd_start
 void map_kernel_space(pde *pd_start)
 {
-    for (unsigned int map_start = 0; map_start < USER_MEM_START; map_start += PAGE_SIZE)
+    for (unsigned int map_start = 0; map_start < USER_MEM_START; 
+        map_start += PAGE_SIZE)
     {
-        if (add_frame(map_start, map_start, pd_start, KERN_PD_FLAG, KERN_PT_FLAG) < 0)
+        if (add_frame(map_start, map_start, pd_start, 
+                    KERN_PD_FLAG, KERN_PT_FLAG) < 0)
         {
             panic("could not do kernel direct mapping");
         }
     }
+}
+
+void set_zero_page(){
+    add_frame(USER_MEM_START, (unsigned int)ZFOD_ADDR_PA,
+              (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG);
+    memset((void *)USER_MEM_START, 0, PAGE_SIZE);
+    remove_frame(USER_MEM_START, (pde *)((void *)get_cr3()));
 }
 
 /// @brief
@@ -211,9 +220,9 @@ void initialize_vm()
     pde *pd_start = create_new_pd();
     init_hashtable(&hash_tb);
     map_kernel_space(pd_start);
-    set_zero_page();
     set_cr3((unsigned int)pd_start);
     set_cr0(get_cr0() | CR0_PG | CR0_PE);
+    set_zero_page();
     // Need to zero out ZFOF frame here also
     // How to do, do we just assign a VA to it, use memset and then clear the page
 }
@@ -228,7 +237,7 @@ void *get_frame_addr()
     {
         return ret_frame;
     }
-    if(frame_curr == ZFOD_ADDR_PA){
+    if((unsigned int)frame_curr == ZFOD_ADDR_PA){
         frame_curr += PAGE_SIZE;
     }
     ret_frame = frame_curr;
@@ -239,13 +248,6 @@ void *get_frame_addr()
         return NULL;
     }
     return ret_frame;
-}
-
-void set_zero_page(){
-    add_frame(USER_MEM_START, (unsigned int)ZFOD_ADDR_PA,
-              (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG);
-    memset(USER_MEM_START, 0, PAGE_SIZE);
-    remove_frame(USER_MEM_START, (pde *)((void *)get_cr3()));
 }
 
 /// @brief
@@ -295,7 +297,7 @@ int new_pages(void *addr, int len)
     for (unsigned int start = base_addr; start < base_addr + len;
          start += PAGE_SIZE)
     {
-        void *frame_addr = ZFOD_ADDR_PA;
+        void *frame_addr = (void *)ZFOD_ADDR_PA;
         // if (frame_addr == NULL)
         // {
         //     // panic("No more pages left to assign");
@@ -397,14 +399,15 @@ void *clone_page_directory(void *old_pd)
             // increment to next page
         }
 
-        unsigned int clone_PA = get_physical(start_map, copy_from);
+        unsigned int clone_PA = (unsigned int)get_physical((unsigned int)start_map, 
+                                                            copy_from);
         
         if(clone_PA == ZFOD_ADDR_PA){
             if (add_frame(clone_PA, ZFOD_ADDR_PA,
                         copy_to, USER_PD_FLAG, USER_PT_FLAG_INITIAL) < 0)
             {
                 lprintf("page already mapped, shouldnt reach here\n");
-                return -1;
+                return NULL;
             }
         }
         else{

@@ -32,7 +32,7 @@
 #include <inc/scheduler.h>
 #include <inc/kern_constants.h>
 
-#define STARTING_FILE "readline_basic"
+#define STARTING_FILE "remove_pages_test2"
 #define IDLE_FILE "idle"
 
 volatile static int __kernel_all_done = 0;

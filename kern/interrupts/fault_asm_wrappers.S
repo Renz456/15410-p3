@@ -133,7 +133,7 @@ gp_wrapper:
 pf_wrapper:
     pusha
     push $14
-    call fault_handler
+    call page_handler
     popa
     iret
 

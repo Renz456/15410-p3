@@ -12,5 +12,7 @@
 #define _HANDLER_H
 
 void fault_handler(int fault);
+void page_handler(int fault);
+
 
 #endif /* _HANDLER_H */

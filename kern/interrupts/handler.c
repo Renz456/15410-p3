@@ -12,11 +12,13 @@
 #include <assert.h>
 #include <inc/vm.h>
 #include <stdlib.h>
+#include <cr.h>
 
 void page_handler(int fault){
     assert(fault == 14);
     unsigned int fault_VA = get_cr2();
     unsigned int fault_PA = (unsigned int)get_physical(fault_VA, (pde *)get_cr3());
+    lprintf("fault VA %p, PA %p", (void *)fault_VA, (void *)fault_PA);
     if(fault_PA == ZFOD_ADDR_PA){
         // Check if the page needs to have some write access as such or naw
         void *frame_addr = get_frame_addr();
@@ -35,7 +37,8 @@ void page_handler(int fault){
         // initially anyways was supposed ot be read only
     }
     else{
-        lprintf("actual page fault has occured");
+        lprintf("actual page fault has occured %p", (void *)fault_VA);
+        MAGIC_BREAK;
     }
 }
 
