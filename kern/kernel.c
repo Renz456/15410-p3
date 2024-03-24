@@ -32,7 +32,7 @@
 #include <inc/scheduler.h>
 #include <inc/kern_constants.h>
 
-#define STARTING_FILE "readline_basic"
+#define STARTING_FILE "idle"
 #define IDLE_FILE "idle"
 
 volatile static int __kernel_all_done = 0;
@@ -114,6 +114,7 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
         lprintf("this should not happen\n");
         return -1;
     }
+    // se_hdr_idle.e_entry = 0x1000000; // mmmmmm why da idle loader wrong?
     prepare_thread(idle_tcb, idle_stack, (void *)se_hdr_idle.e_entry);
     MAGIC_BREAK;
     set_cr3((uint32_t)page_directory);

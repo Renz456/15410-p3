@@ -8,16 +8,21 @@
  */
 
 #include <inc/task.h>
+#include <inc/thread.h>
 #include <inc/kern_constants.h>
+#include <inc/scheduler.h>
 #include <malloc.h>
 #include <assert.h>
 #include <simics.h>
+#include <interrupt_defines.h>
+#include <asm.h>
 #include <synchronization/mutex_kern.h>
 #include <synchronization/cvar_kern.h>
 // #include <vm.h>
 
 #define TASK_PAGE_SIZE PAGE_SIZE
 int next_pid = 0;
+pcb_t *main_pcb;
 
 static void *setup_main(void *stack_high, void *stack_low, char **argv, int argc);
 
@@ -82,7 +87,7 @@ static void *setup_main(void *stack_high, void *stack_low, char **argv, int argc
 
 void add_child(pcb_t **parent_list, pcb_t *child)
 {
-    assert(parent && child);
+    assert(parent_list && child);
     if (*parent_list == NULL)
     {
         *parent_list = child;
@@ -99,6 +104,7 @@ void add_child(pcb_t **parent_list, pcb_t *child)
 
 void remove_child(pcb_t **parent_list, pcb_t *child)
 {
+    assert(parent_list && child);
     if (child->next == NULL && child->prev == NULL)
     {
         *parent_list = NULL;
@@ -121,3 +127,73 @@ void remove_child(pcb_t **parent_list, pcb_t *child)
     child->next = NULL;
     child->prev = NULL;
 }
+
+void kernel_task_vanish(int status)
+{
+    /* this will definitely be a deadlock/race lol*/
+    /* To avoid deadlock keep preemption by always locking child first?*/
+    tcb_t *tcb = get_tcb();
+    pcb_t *pcb = tcb->pcb;
+
+    /* let children know */
+    for (pcb_t *child = pcb->child_list; child != NULL; child = child->next)
+    {
+        // TODO check this input
+        mutex_lock(&child->pid, &child->pcb_mp);
+        child->parent = NULL;
+        mutex_unlock(&child->pid, &child->pcb_mp);
+    }
+
+    /* TODO */
+    mutex_lock(tcb->tid, &pcb->pcb_mp);
+    pcb_t *parent = pcb->parent;
+    if (!parent) // shouldn't happen for now
+        parent = main_pcb;
+
+    mutex_lock(tcb->tid, &parent->pcb_mp);
+    remove_child(&parent->child_list, pcb);
+    pcb->exited = 1; // this will be status later
+    pcb->status = status;
+    add_child(&parent->zombie_list, pcb);
+
+    mutex_unlock(&parent->pcb_mp);
+    mutex_unlock(&pcb->pcb_mp);
+
+    /* clear user vm here? */
+
+    disable_interrupts();
+    tcb->is_runnable = 0;
+    context_switch(-1);
+
+    /* should not return back here */
+    assert(1 == 2);
+}
+
+void kernel_vanish()
+{
+    tcb_t *tcb = get_tcb();
+    pcb_t *pcb = tcb->pcb;
+
+    atomic_decrement(&pcb->num_threads);
+
+    if (pcb->num_threads == 0)
+    {
+        /* basically task vanish */
+        kernel_task_vanish();
+    }
+
+    /* any vm clearing? */
+
+    /* need to disable interupts to safely switch out of this
+        thread but when to reenable*/
+
+    disable_interrupts();
+    tcb->is_runnable = 0;
+    context_switch(-1);
+
+    /* should not return back here */
+    assert(3 == 4);
+}
+
+/* TODO will need to consider freeing tcb and maybe even pcb */
+/* can't free in vanish and context switch needs them */

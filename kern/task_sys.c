@@ -13,6 +13,7 @@
 #include <inc/thread.h>
 #include <inc/scheduler.h>
 #include <inc/task_sys.h>
+#include <assert.h>
 #include <inc/kern_constants.h>
 #include <loader.h>
 #include <elf_410.h>
@@ -171,7 +172,7 @@ Since no spin waiting is allowed, mutex/cvar implementations could be just desch
 Should maybe also lock some vm stuffs? Like the free frame list,
 
 */
-int kernel_wait()
+int kernel_wait(int *status_ptr)
 {
   tcb_t *tcb = get_tcb();
   pcb_t *pcb = tcb->pcb;
@@ -184,6 +185,8 @@ int kernel_wait()
   /* will need to have some clean up of vm etc. here */
   // destroy vm
   int child_pid = reaped_child->pid;
-  mutex_unlock(tcb->tid, &pcb->pcb_mp);
+  if (status_ptr != NULL)
+    *status_ptr = reaped_child->status;
+  mutex_unlock(&pcb->pcb_mp);
   return child_pid;
 }

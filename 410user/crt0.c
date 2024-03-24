@@ -16,6 +16,6 @@ extern void install_autostack(void *stack_high, void *stack_low);
 void _main(int argc, char *argv[], void *stack_high, void *stack_low)
 {
   // install_autostack(stack_high, stack_low);
-  lprintf("starting user program\n");
+  // lprintf("starting user program\n");
   exit(main(argc, argv));
 }

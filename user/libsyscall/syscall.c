@@ -22,10 +22,10 @@
 
 #include <syscall.h>
 #include <simics.h>
-#include <task.h>
-#include <thread.h>
-#include <synchronization/cvar_kern.h>
-#include <synchronization/mutex_kern.h>
+// #include <inc/task.h>
+// #include <inc/thread.h>
+// #include <synchronization/cvar_kern.h>
+// #include <synchronization/mutex_kern.h>
 
 volatile static int placate_the_compiler;
 
@@ -131,19 +131,22 @@ int readfile(char *filename, char *buf, int count, int offset)
 void task_vanish(int status)
 {
 	lprintf("task vanish protoype");
-	tcb_t *tcb = get_tcb();
-	pcb_t *pcb = tcb->pcb;
-	mutex_lock(tcb->tid, &pcb->pcb_mp);
-	if (pcb->parent)
+	// tcb_t *tcb = get_tcb();
+	// pcb_t *pcb = tcb->pcb;
+	// mutex_lock(tcb->tid, &pcb->pcb_mp);
+	// if (pcb->parent)
+	// {
+	// 	pcb_t *parent = pcb->parent;
+	// 	mutex_lock(tcb->tid, &parent->pcb_mp);
+	// 	remove_child(&parent->child_list, pcb);
+	// 	pcb->exited = 1; // this will be status later
+	// 	add_child(&parent->zombie_list, pcb);
+	// 	mutex_unlock(&parent->pcb_mp);
+	// }
+	// mutex_unlock(&pcb->pcb_mp);
+	while (1)
 	{
-		pcb_t *parent = pcb->parent;
-		mutex_lock(tcb->tid, &parent->pcb_mp);
-		remove_child(&parent->child_list, pcb);
-		pcb->exited = 1; // this will be status later
-		add_child(&parent->zombie_list, pcb);
-		mutex_unlock(&parent->pcb_mp);
 	}
-	mutex_unlock(&pcb->pcb_mp);
 }
 
 // int new_pages(void *addr, int len)

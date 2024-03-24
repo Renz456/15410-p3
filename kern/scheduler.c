@@ -85,6 +85,7 @@ void add_to_run_queue(tcb_t *tcb, int is_new_thread)
 int kernel_yield(int tid)
 {
     context_switch(tid);
+    enable_interrupts();
     outb(INT_CTL_PORT, INT_ACK_CURRENT);
 
     /* DO WE NEED SPECIAL CASING? */

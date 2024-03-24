@@ -37,6 +37,7 @@ void timer_interupt_handler()
         lprintf("A second has passed in thread %d!\n", get_tcb()->tid);
         // tickback(num_ticks);
         context_switch(-1);
+        enable_interrupts();
     }
     outb(INT_CTL_PORT, INT_ACK_CURRENT);
 }
@@ -50,3 +51,10 @@ void set_tickback(void (*callback_fn)(unsigned int))
 {
     tickback = callback_fn;
 }
+
+/*
+00000000 <main>:
+   0:   55                      push   %ebp
+   1:   89 e5                   mov    %esp,%ebp
+   3:   eb fe                   jmp    3 <main+0x3>
+*/

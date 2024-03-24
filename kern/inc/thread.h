@@ -19,6 +19,7 @@ typedef struct tcb
     int tid;
     int is_runnable;
     int new_thread;
+    int exited;
     // void *stack_high;
     // void *stack_low;
     void *kernel_stack;

@@ -100,3 +100,12 @@ atomic_increment:
     lock xadd %eax, (%ecx) /* eax = ecx, ecx += 1 */
     popl %ecx
     ret 
+
+.global atomic_decrement
+atomic_decrement:
+    pushl %ecx
+    movl  8(%esp), %ecx  /* load input */
+    movl  $-1, %eax
+    lock xadd %eax, (%ecx) /* eax = ecx, ecx += 1 */
+    popl %ecx
+    ret 
