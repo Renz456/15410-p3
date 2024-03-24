@@ -4,6 +4,7 @@
 #include <synchronization/list_helper.h>
 #include <synchronization/mutex_kern.h>
 #include <scheduler.h>
+#include <asm.h>
 
 int mutex_init(mutex_t *mp)
 {
@@ -23,11 +24,13 @@ int mutex_lock(int tid, mutex_t *mutex)
     assert(mutex != NULL);
     // Stop context switching
     disable_contexts(); // or interupts??
+    disable_interrupts();
     if (mutex->locked == 1)
     {
         mutex->locked--;
         mutex->tid = tid;
         enable_contexts();
+        enable_interrupts();
         // enable context switching
     }
     else
@@ -43,12 +46,15 @@ int mutex_lock(int tid, mutex_t *mutex)
         add_queue(&node, &mutex->wait_queue);
 
         enable_contexts();
+        enable_interrupts();
         kernel_deschedule(tid, &node.reject);
         disable_contexts();
+        disable_interrupts();
 
         mutex->locked--;
         mutex->tid = tid;
         enable_contexts();
+        enable_interrupts();
     }
     return 0;
 }
@@ -58,6 +64,7 @@ int mutex_unlock(mutex_t *mutex)
     assert(mutex != NULL);
     // stop context switching
     disable_contexts();
+    disable_interrupts();
     if (queue_is_empty(&mutex->wait_queue))
     {
         mutex->locked++;
@@ -73,6 +80,7 @@ int mutex_unlock(mutex_t *mutex)
         mutex->tid = -1;
     }
     enable_contexts();
+    enable_interrupts();
     return 0;
 }
 

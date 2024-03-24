@@ -109,9 +109,11 @@ int kernel_yield(int tid)
  */
 int kernel_deschedule(int tid, int *reject)
 {
+    lprintf("descheduling %d\n", tid);
     disable_interrupts();
     if (reject == NULL || *reject != 0)
     {
+        enable_interrupts();
         return -1;
     }
 
@@ -119,7 +121,7 @@ int kernel_deschedule(int tid, int *reject)
     tcb_t *tcb = get_tcb();
     tcb->is_runnable = 0;
     insert_thread(&wait_queue_head, &wait_queue_tail, tcb);
-    enable_interrupts();
+    // enable_interrupts();
     int result = kernel_yield(-1);
     return result;
 }
@@ -154,7 +156,10 @@ int kernel_make_runnable(int tid)
 void context_switch(int tid)
 {
     if (context_enable == 0)
+    {
+        lprintf("contexts diasbled\n");
         return;
+    }
     /*
     Probably keep a list of tcbs or smth
 
@@ -180,13 +185,14 @@ void context_switch(int tid)
     if (cur_tcb->is_runnable)
         insert_thread(&run_queue_head, &run_queue_tail, cur_tcb);
 
+    disable_interrupts();
     tcb_t *to_switch = find_thread(run_queue_head, run_queue_tail, tid);
     if (!to_switch)
     {
         to_switch = run_queue_head;
     }
     remove_thread(&run_queue_head, &run_queue_tail, to_switch);
-
+    enable_interrupts();
     // void *save_stack = cur_tcb->esp;
 
     assert(to_switch->pcb->page_directory);

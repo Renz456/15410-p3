@@ -24,22 +24,23 @@ unsigned int num_ticks = 0;     // Counter for timer interupts
 void timer_interupt_handler()
 {
     // Call clock tick callback function
-    if (kernel_gettid() == 1)
-    {
-        MAGIC_BREAK;
-    }
+    // if (kernel_gettid() == 1)
+    // {
+    //     // MAGIC_BREAK;
+    // }
     num_ticks++;
 
     // MAGIC_BREAK;
 
+    outb(INT_CTL_PORT, INT_ACK_CURRENT); // THERER IS A BUG HERE!!
     if (num_ticks % 500 == 0)
     {
         lprintf("A second has passed in thread %d!\n", get_tcb()->tid);
         // tickback(num_ticks);
         context_switch(-1);
-        enable_interrupts();
+        lprintf("ctx return in thread %d!\n", get_tcb()->tid);
+        // enable_interrupts();
     }
-    outb(INT_CTL_PORT, INT_ACK_CURRENT);
 }
 
 /**

@@ -146,6 +146,7 @@ void task_vanish(int status)
 	// mutex_unlock(&pcb->pcb_mp);
 	while (1)
 	{
+		// lprintf("still here?\n");
 	}
 }
 

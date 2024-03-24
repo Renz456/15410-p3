@@ -11,6 +11,7 @@
 #include <syscall.h>
 #include <simics.h>
 #include <assert.h>
+#include <asm.h>
 #include <synchronization/mutex_kern.h>
 #include <synchronization/list_helper.h>
 #include <synchronization/cvar_kern.h>
@@ -74,8 +75,13 @@ void cond_wait(cond_t *cv, mutex_t *mp)
     mutex_lock(tid, &cv->mutex);
     add_queue(&node, cv->wait_queue); // Putting ourselves on the wait queue
     mutex_unlock(mp);
+    lprintf("cehck lock status %d\n", mp->locked);
     mutex_unlock(&cv->mutex);
     kernel_deschedule(tid, &node.reject); // Should we check for the ret val of this
+    // lprintf("cond wait spinning\n");
+    // while (!node.reject)
+    // {
+    // }
     mutex_lock(tid, mp);
 }
 
@@ -91,7 +97,9 @@ void cond_signal(cond_t *cv)
         mut_node_t *waiter_node = remove_queue(cv->wait_queue);
         waiter_node->reject = 1;
         mutex_unlock(&cv->mutex);
+        disable_interrupts();
         kernel_make_runnable(waiter_node->tid);
+        enable_interrupts();
     }
     else
     {

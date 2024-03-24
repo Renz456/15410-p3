@@ -72,7 +72,23 @@ xchg_wrapper:
 .global timer_wrapper
 timer_wrapper:
     pusha
+    pushl %ds           /* Code segments are saved automatically*/
+    pushl %es           /* Data segment and general purpose registers need to be manually saved*/
+    pushl %fs 
+    pushl %gs
+
+    movl $SEGSEL_KERNEL_DS, %eax
+    movl %eax, %ds
+    movl %eax, %es
+    movl %eax, %fs
+    movl %eax, %gs
+
     call timer_interupt_handler
+
+    popl %gs
+    popl %fs 
+    popl %es 
+    popl %ds
     popa
     IRET
 
@@ -82,7 +98,22 @@ timer_wrapper:
 .global  keyboard_wrapper
 keyboard_wrapper:
     pusha
-    /* call keyboard_interupt_handler */
+    pushl %ds           /* Code segments are saved automatically*/
+    pushl %es           /* Data segment and general purpose registers need to be manually saved*/
+    pushl %fs 
+    pushl %gs
+
+    movl $SEGSEL_KERNEL_DS, %eax
+    movl %eax, %ds
+    movl %eax, %es
+    movl %eax, %fs
+    movl %eax, %gs
+    call keyboard_interupt_handler
+    popl %gs
+    popl %fs 
+    popl %es 
+    popl %ds
+    
     popa
     IRET
 

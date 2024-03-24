@@ -52,7 +52,11 @@ void keyboard_interupt_handler()
   char new_byte = inb(KEYBOARD_PORT);
   mutex_lock(kernel_gettid(), &keyb_mp);
   if (increment_index(newest_char_index) == current_buffer_index)
+  {
+    mutex_unlock(&keyb_mp);
     return;
+  }
+  lprintf("received a key press\n");
   kb_buffer[newest_char_index] = new_byte;
   newest_char_index = increment_index(newest_char_index);
   mutex_unlock(&keyb_mp);
@@ -74,6 +78,7 @@ int readchar(void)
     kh_type augch = process_scancode(ch);
     if (KH_HASDATA(augch) && KH_ISMAKE(augch))
     {
+      mutex_unlock(&keyb_mp);
       enable_interrupts();
       return KH_GETCHAR(augch);
     }
@@ -99,7 +104,8 @@ int readline(int len, char *buf)
   while (n < len && (char)current_char != '\n')
   {
     current_char = readchar();
-    mutex_lock(kernel_gettid(), &keyb_mp);
+    int tid = kernel_gettid();
+    mutex_lock(tid, &keyb_mp);
     switch (current_char)
     {
     case -1:

@@ -11,6 +11,7 @@
 #include <inc/thread.h>
 #include <inc/kern_constants.h>
 #include <inc/scheduler.h>
+#include <inc/asm_helpers.h>
 #include <malloc.h>
 #include <assert.h>
 #include <simics.h>
@@ -139,12 +140,13 @@ void kernel_task_vanish(int status)
     for (pcb_t *child = pcb->child_list; child != NULL; child = child->next)
     {
         // TODO check this input
-        mutex_lock(&child->pid, &child->pcb_mp);
+        mutex_lock(child->pid, &child->pcb_mp);
         child->parent = NULL;
-        mutex_unlock(&child->pid, &child->pcb_mp);
+        mutex_unlock(&child->pcb_mp);
     }
 
-    /* TODO */
+    /* TODO add zombies to main pcb too */
+
     mutex_lock(tcb->tid, &pcb->pcb_mp);
     pcb_t *parent = pcb->parent;
     if (!parent) // shouldn't happen for now
@@ -175,11 +177,11 @@ void kernel_vanish()
     pcb_t *pcb = tcb->pcb;
 
     atomic_decrement(&pcb->num_threads);
-
+    /* These two should be atomic too, otherwise two threads can call task vanish*/
     if (pcb->num_threads == 0)
     {
         /* basically task vanish */
-        kernel_task_vanish();
+        kernel_task_vanish(1);
     }
 
     /* any vm clearing? */
