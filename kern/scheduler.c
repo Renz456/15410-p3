@@ -15,6 +15,7 @@
 #include <thread.h>
 #include <simics.h>
 #include <cr.h>
+#include <asm.h>
 #include <asm_helpers.h>
 #include <inc/scheduler.h>
 #include <assert.h>
@@ -95,6 +96,7 @@ int kernel_yield(int tid)
     // else
     // {
     // }
+    return 0;
 }
 
 /**
@@ -129,7 +131,7 @@ int kernel_deschedule(int tid, int *reject)
  */
 int kernel_make_runnable(int tid)
 {
-    tcb_t *tcb = find_thread(&wait_queue_head, &wait_queue_tail, tid);
+    tcb_t *tcb = find_thread(wait_queue_head, wait_queue_tail, tid);
     if (!tcb)
         return -1;
 
@@ -174,10 +176,10 @@ void context_switch(int tid)
 
     // add current thread to runnable queue and remove head of queue
     // (since round robin) as the next thread to execute.
-    if (tcb->is_runnable)
+    if (cur_tcb->is_runnable)
         insert_thread(&run_queue_head, &run_queue_tail, cur_tcb);
 
-    tcb_t *to_switch = find_thread(&run_queue_head, &run_queue_tail, tid);
+    tcb_t *to_switch = find_thread(run_queue_head, run_queue_tail, tid);
     if (!to_switch)
     {
         to_switch = run_queue_head;
@@ -199,11 +201,14 @@ void context_switch(int tid)
     lprintf("switching to new thread %d pid %d from %d pid %d! \n", to_switch->tid, to_switch->pcb->pid, cur_tcb->tid, cur_tcb->pcb->pid);
     if (to_switch->new_thread)
     {
-        to_switch->new_thread = 0; // set thread to old
+        to_switch->new_thread = 0;           // set thread to old
+        outb(INT_CTL_PORT, INT_ACK_CURRENT); // TODO THIS COULD BE A BOG
+        MAGIC_BREAK;
         new_switch(&cur_tcb->esp, to_switch->esp);
     }
     else
     {
+
         finish_switch(&cur_tcb->esp, to_switch->esp);
     }
 }

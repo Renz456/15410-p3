@@ -80,11 +80,15 @@ int check_addr_present(void *virtual_address)
 {
     pde *pd_start = (pde *)get_cr3();
     unsigned int pd_idx = (unsigned int)get_pd_index((void *)virtual_address);
+    // I think this needs to be the other way round
+    if (!check_present((void *)pd_start[pd_idx]))
+        return 0;
     pte *pt_start = (pte *)(pd_start[pd_idx] & CLEAR_BOTTOM);
     int pt_idx = (unsigned int)get_pt_index((void *)virtual_address);
 
     // void *page_table = (void *)(*(unsigned int *)(pd_start + pd_idx));
-    return check_present((void *)pt_start[pt_idx]) && (unsigned int)virtual_address != (unsigned int)COPY_ADDR_VA;
+    return check_present((void *)pt_start[pt_idx]) && 
+    (unsigned int)virtual_address != (unsigned int)COPY_ADDR_VA;
 }
 
 /// @brief
@@ -127,6 +131,8 @@ void *remove_frame(unsigned int virtual_address, pde *pd_start)
 {
     assert(pd_start != NULL);
     unsigned int pd_idx = (unsigned int)get_pd_index((void *)virtual_address);
+    //lprintf("pd index from remove_frame is %d and start of paging is at %p", 
+    //pd_idx, (void *)pd_start);
     if (!check_present((void *)pd_start[pd_idx]))
     {
         // Directory is not present
@@ -144,7 +150,9 @@ void *remove_frame(unsigned int virtual_address, pde *pd_start)
     }
 
     void *free_frame = get_physical_address((void *)pt_start[pt_idx]);
-    set_not_present(pt_start[pt_idx]);
+    pt_start[pt_idx] = (pte)0;
+    memset((void *)virtual_address, 0, PAGE_SIZE);
+    //set_not_present(pt_start[pt_idx]);
 
     return free_frame;
 }
@@ -158,6 +166,8 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address,
     // Check if pd_start[pd_idx][pt_idx] is present otherwise create
     // Once both and creating then store frame in pd_start[pd_idx][pt_idx]
     // Need to read about the bottom 12 bit flags associated with both entries
+    //lprintf("pd_idx from add_frame is %d and start of paging is at %p", 
+    //pd_idx, (void *)pd_start);
     if (!check_present((void *)pd_start[pd_idx]))
     {
         pde *new_page_table = create_new_pd();
@@ -168,7 +178,8 @@ int add_frame(unsigned int virtual_address, unsigned int physical_address,
     int pt_idx = (unsigned int)get_pt_index((void *)virtual_address);
 
     // void *page_table = (void *)(*(unsigned int *)(pd_start + pd_idx));
-    if (check_present((void *)pt_start[pt_idx]) && virtual_address != (unsigned int)COPY_ADDR_VA)
+    if (check_present((void *)pt_start[pt_idx]) 
+        && virtual_address != (unsigned int)COPY_ADDR_VA)
     {
         lprintf("page already seems to be mapped %x\n", pt_start[pt_idx]);
         return -1;
@@ -245,7 +256,7 @@ int new_pages(void *addr, int len)
 {
 
     assert(addr != NULL);
-    lprintf("new page addr %p %d\n", addr, check_present(addr));
+    //lprintf("new page addr %p %d\n", addr, check_present(addr));
     if (len % PAGE_SIZE != 0)
     {
         lprintf("len is not page alinged");
@@ -266,17 +277,20 @@ int new_pages(void *addr, int len)
         return -2;
     }
 
-    if (check_present(addr))
-        return -7;
+    // if (check_present(addr)){
+        
+    // }
+    //     return -7;
 
     int num_pages = 0;
 
-    // for (unsigned int start = base_addr; start < base_addr + len;
-    //      start += PAGE_SIZE)
-    // {
-    //     if (check_addr_present((void *)start))
-    //         return -1;
-    // }
+    for (unsigned int start = base_addr; start < base_addr + len;
+         start += PAGE_SIZE)
+    {
+        if (check_addr_present((void *)start))
+            //lprintf("trying to map to a present page is sus"); //lol this break it
+            return -1;
+    }
 
     for (unsigned int start = base_addr; start < base_addr + len;
          start += PAGE_SIZE)
@@ -296,6 +310,7 @@ int new_pages(void *addr, int len)
         num_pages += 1;
     }
     // lprintf("added page from %p to %p\n", addr, addr + len);
+    lprintf("%d many pages alloced for %p\n", num_pages, addr);
     vm_hash_node_t *new_node = malloc(sizeof(vm_hash_node_t));
     if (new_node == NULL)
     {
@@ -321,11 +336,15 @@ int remove_pages(void *addr)
     // void* start_addr = retrieve_node->addr;
     remove_addr_thread(retrieve_node, &hash_tb); // Remove thread from hash_tb
     unsigned int start = (unsigned int)addr;
+    lprintf("trying to remove %d pages from %p", num_pages, (void *)start);
     for (unsigned int start_addr = start; start_addr < (start + (PAGE_SIZE * num_pages)); start_addr += PAGE_SIZE)
     {
-        void *frame_addr = remove_frame(start_addr, (pde *)((void *)(get_cr3)));
+        void *frame_addr = remove_frame(start_addr, (pde *)((void *)(get_cr3())));
         if((unsigned int)frame_addr == ZFOD_ADDR_PA){
             continue;
+        }
+        if(frame_addr == NULL){
+            return -1;
         }
         add_free_frame(frame_addr, head);
     }

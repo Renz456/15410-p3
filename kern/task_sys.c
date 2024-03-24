@@ -21,6 +21,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <inc/asm_helpers.h>
+#include <synchronization/mutex_kern.h>
+#include <synchronization/list_helper.h>
+#include <synchronization/cvar_kern.h>
 
 /**
  * @brief Set the child task's stack. From the assembly code, the return address
@@ -72,12 +75,19 @@ int kernel_fork(gen_reg_t *regs)
   void *old_esp = get_esp();
   lprintf("what esp is this %p\n", old_esp);
   void *cur_pd = (void *)get_cr3();
+  tcb_t *cur_tcb = get_tcb();
+  pcb_t *cur_pcb = cur_tcb->pcb;
 
   void *new_pd = clone_page_directory(cur_pd);
   lprintf("Parent successful clone\n");
   pcb_t *new_pcb = create_pcb(new_pd);
   // void *stack = init_task(new_pcb); // I should not need to do this
   tcb_t *new_tcb = create_tcb(new_pcb); // I need this since there's a new kernel stack
+
+  int tid = kernel_gettid();
+  mutex_lock(tid, &cur_pcb->pcb_mp);
+  add_child(&cur_pcb->child_list, new_pcb);
+  mutex_unlock(&cur_pcb->pcb_mp);
 
   /*
   Set the new threads registers etc. on the stack
@@ -161,3 +171,19 @@ Since no spin waiting is allowed, mutex/cvar implementations could be just desch
 Should maybe also lock some vm stuffs? Like the free frame list,
 
 */
+int kernel_wait()
+{
+  tcb_t *tcb = get_tcb();
+  pcb_t *pcb = tcb->pcb;
+  mutex_lock(tcb->tid, &pcb->pcb_mp);
+  if (pcb->zombie_list == NULL)
+    cond_wait(&pcb->pcb_cv, &pcb->pcb_mp);
+  pcb_t *reaped_child = pcb->zombie_list;
+  assert(reaped_child->exited);
+  remove_child(&pcb->zombie_list, reaped_child);
+  /* will need to have some clean up of vm etc. here */
+  // destroy vm
+  int child_pid = reaped_child->pid;
+  mutex_unlock(tcb->tid, &pcb->pcb_mp);
+  return child_pid;
+}

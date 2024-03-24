@@ -38,6 +38,7 @@ int get_pt_index(void *entry);
 int get_pd_index(void *entry);
 void *get_frame_addr();
 int new_pages(void *addr, int len);
+int remove_pages(void *addr);
 int align_pages(void *addr, int size);
 void *clone_page_directory(void *old_pd);
 int validate_string(char *string);

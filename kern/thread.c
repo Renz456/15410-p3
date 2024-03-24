@@ -90,6 +90,12 @@ void prepare_thread(tcb_t *tcb, void *stack_base, void *entry_instruction)
     usr_state_t *load_user = (usr_state_t *)(stack_base - sizeof(usr_state_t));
     *load_user = state;
     tcb->esp = (void *)load_user;
+    usr_state_t user_state = *load_user;
+    lprintf("SS: %lx\n", user_state.ss);
+    lprintf("esp: %lx\n", user_state.esp);
+    lprintf("eflags: %lx\n", user_state.eflags);
+    lprintf("cs: %lx\n", user_state.cs);
+    lprintf("eip: %lx\n", user_state.eip);
     add_to_run_queue(tcb, 1);
 }
 
@@ -103,11 +109,11 @@ void run_thread(tcb_t *tcb, void *stack_base, void *entry_instruciton)
     usr_state_t user_state = set_user_state(tcb, stack_base, entry_instruciton);
     lprintf("check user state before run eip: %lx esp:%lx\n", user_state.eip, user_state.esp);
     // user_state.cs += 1;
-    lprintf("SS: %lx\n", user_state.ss);
-    lprintf("esp: %lx\n", user_state.esp);
-    lprintf("eflags: %lx\n", user_state.eflags);
-    lprintf("cs: %lx\n", user_state.cs);
-    lprintf("eip: %lx\n", user_state.eip);
+    // lprintf("SS: %lx\n", user_state.ss);
+    // lprintf("esp: %lx\n", user_state.esp);
+    // lprintf("eflags: %lx\n", user_state.eflags);
+    // lprintf("cs: %lx\n", user_state.cs);
+    // lprintf("eip: %lx\n", user_state.eip);
     // add_to_run_queue(tcb, 0);
     MAGIC_BREAK;
     exec_user(user_state);

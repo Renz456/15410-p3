@@ -1,5 +1,5 @@
 /**
- * @file new_pages_wrapper.S
+ * @file readline_wrapper.S
  * @author Rene Ravanan (rravanan)
  *         Abhinav Gupta (abhinav6)
  * @brief 
@@ -10,16 +10,12 @@
 
 #include <seg.h>
 #include <simics.h>
-; #include <vm.h>
-; #include <syscall_wrappers.h>
-; #include <inc/exec_wrapper.h>
-
 
 /* should this become a regular syscall wrapper?? */
 
-.global new_pages_wrapper
+.global readline_wrapper
 
-new_pages_wrapper:
+readline_wrapper:
     pushl %ebp
     mov   %esp, %ebp     
     sub   $4, %esp       /* Make space for return value */
@@ -41,7 +37,7 @@ new_pages_wrapper:
     movl (%esi), %eax
     pushl %eax
 
-    call new_pages
+    call readline
     
     mov  %eax,-4(%ebp) 
     /* movl  %eax,52(%esp) */ /* store result on stack */

@@ -12,8 +12,7 @@
 
 int main()
 {
-    int x = gettid();
-    lprintf("IN IDLE! %d\n", x);
+    // lprintf("IN IDLE %d\n", gettid());
     while (1)
     {
     }

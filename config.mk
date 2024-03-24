@@ -104,6 +104,7 @@ UPDATE_METHOD = afs
 # directory.
 #
 410TESTS = getpid_test1 ck1 loader_test1 loader_test2 fork_test1 new_pages \
+		   print_basic readline_basic remove_pages_test2
 		   
 
 ###########################################################################
@@ -147,6 +148,7 @@ THREAD_OBJS = malloc.o panic.o
 # Object files for your syscall wrappers
 ###########################################################################
 SYSCALL_OBJS = syscall.o gettid.o new_pages.o fork.o exec.o new_pages.o halt.o \
+				print.o readline.o remove_pages.o
 
 
 ###########################################################################
@@ -164,11 +166,13 @@ AUTOSTACK_OBJS = autostack.o
 #
 # Kernel object files you provide in from kern/
 #
-KERNEL_OBJS = fake_console.o kernel.o loader.o malloc_wrappers.o interrupts/fault_asm_wrappers.o \
-			  interrupts/interupt.o asm_helpers.o task.o sycall_wrappers_asm/gettid_wrapper.o interrupts/handler.o thread.o \
-			  memory/virtual_mem.o hardware/timer.o hardware/keyboard.o scheduler.o thread_obj.o \
-			  sycall_wrappers_asm/fork_wrapper.o task_sys.o memory/hash_helper.o synchronization/list_helper.o synchronization/mutex_kern.o \
-			  sycall_wrappers_asm/halt_wrapper.o sycall_wrappers_asm/exec_wrapper.o sycall_wrappers_asm/new_pages_wrapper.o
+KERNEL_OBJS = console.o kernel.o loader.o malloc_wrappers.o interrupts/fault_asm_wrappers.o \
+			  interrupts/interupt.o asm_helpers.o task.o syscall_wrappers_asm/gettid_wrapper.o interrupts/handler.o thread.o \
+			  memory/virtual_mem.o hardware/timer.o scheduler.o thread_obj.o \
+			  syscall_wrappers_asm/fork_wrapper.o task_sys.o memory/hash_helper.o synchronization/list_helper.o synchronization/mutex_kern.o \
+			  syscall_wrappers_asm/halt_wrapper.o syscall_wrappers_asm/exec_wrapper.o syscall_wrappers_asm/new_pages_wrapper.o \
+			  syscall_wrappers_asm/print_wrapper.o synchronization/cvar_kern.o hardware/keyboard.o \
+			  syscall_wrappers_asm/readline_wrapper.o syscall_wrappers_asm/remove_pages_wrapper.o
 
 
 ###########################################################################

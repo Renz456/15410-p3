@@ -22,8 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <p1kern.h>
 #include <asm.h>
+#include <video_defines.h>
+#include <console.h>
+#include <assert.h>
 
 // Global constants to keep track of cursor position,
 // status and terminal colour
@@ -143,7 +145,7 @@ int putbyte(char ch)
 
 void putbytes(const char *s, int len)
 {
-    affirm(s == NULL || len <= 0);
+    affirm(s != NULL || len >= 0);
     for (int i = 0; i < len; i++)
         putbyte(s[i]);
 }

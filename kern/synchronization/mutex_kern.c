@@ -1,8 +1,8 @@
 #include <simics.h>
 #include <assert.h>
 #include <stdlib.h>
-#include <list_helper.h>
-#include <mutex_kern.h>
+#include <synchronization/list_helper.h>
+#include <synchronization/mutex_kern.h>
 #include <scheduler.h>
 
 int mutex_init(mutex_t *mp)
@@ -13,9 +13,9 @@ int mutex_init(mutex_t *mp)
     if (queue_init(&mp->wait_queue) < 0)
     {
         lprintf("Could not initialize mutex wait queue");
-        return NULL;
+        return -2;
     }
-    return mp;
+    return 0;
 }
 
 int mutex_lock(int tid, mutex_t *mutex)
@@ -23,7 +23,7 @@ int mutex_lock(int tid, mutex_t *mutex)
     assert(mutex != NULL);
     // Stop context switching
     disable_contexts(); // or interupts??
-    if (mutex->locked)
+    if (mutex->locked == 1)
     {
         mutex->locked--;
         mutex->tid = tid;

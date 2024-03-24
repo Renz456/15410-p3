@@ -11,6 +11,8 @@
 #ifndef _SCHEDULER_H
 #define _SCHEDULER_H
 
+#include <inc/thread.h>
+
 void initialise_scheduler();
 void enable_contexts();
 void disable_contexts();
