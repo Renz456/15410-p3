@@ -47,7 +47,7 @@ typedef struct entry_args
 
 pcb_t *create_pcb(void *page_directory);
 void *init_task(pcb_t *pcb, char **argv, int argc);
-void add_child(pcb_t *parent, pcb_t *child);
-void remove_child(pcb_t *parent, pcb_t *child);
+void add_child(pcb_t **parent, pcb_t *child);
+void remove_child(pcb_t **parent, pcb_t *child);
 
 #endif /* _TASK_H */

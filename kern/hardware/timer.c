@@ -24,10 +24,10 @@ unsigned int num_ticks = 0;     // Counter for timer interupts
 void timer_interupt_handler()
 {
     // Call clock tick callback function
-    if (kernel_gettid() == 1)
-    {
-        MAGIC_BREAK;
-    }
+    // if (kernel_gettid() == 1)
+    // {
+    //     MAGIC_BREAK;
+    // }
     num_ticks++;
 
     // MAGIC_BREAK;

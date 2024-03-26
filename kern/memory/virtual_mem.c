@@ -280,9 +280,9 @@ int new_pages(void *addr, int len)
     }
 
     // if (check_present(addr)){
-        
-    // }
     //     return -7;
+
+    // }
 
     int num_pages = 0;
 
@@ -297,14 +297,16 @@ int new_pages(void *addr, int len)
     for (unsigned int start = base_addr; start < base_addr + len;
          start += PAGE_SIZE)
     {
-        void *frame_addr = (void *)ZFOD_ADDR_PA;
-        // if (frame_addr == NULL)
-        // {
-        //     // panic("No more pages left to assign");
-        //     return -5;
-        // }
+        // void *frame_addr = (void *)ZFOD_ADDR_PA;
+        void *frame_addr = get_frame_addr();
+
+        if (frame_addr == NULL)
+        {
+            // panic("No more pages left to assign");
+            return -5;
+        }
         if (add_frame(start, (unsigned int)frame_addr,
-                      (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG_INITIAL) < 0)
+                      (pde *)((void *)get_cr3()), USER_PD_FLAG, USER_PT_FLAG) < 0)
         {
             lprintf("page already mapped, shouldnt reach here\n");
             return -1;

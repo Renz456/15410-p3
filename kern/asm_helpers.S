@@ -72,7 +72,6 @@ xchg_wrapper:
 .global timer_wrapper
 timer_wrapper:
     pusha
-    call sim_breakpoint
     call timer_interupt_handler
     popa
     IRET

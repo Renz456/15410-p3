@@ -13,9 +13,11 @@
 #include <inc/vm.h>
 #include <stdlib.h>
 #include <cr.h>
+#include <inc/asm_helpers.h>
 
 void page_handler(int fault){
     assert(fault == 14);
+    MAGIC_BREAK;
     unsigned int fault_VA = get_cr2();
     unsigned int fault_PA = (unsigned int)get_physical(fault_VA, (pde *)get_cr3());
     lprintf("fault VA %p, PA %p", (void *)fault_VA, (void *)fault_PA);
@@ -32,6 +34,7 @@ void page_handler(int fault){
         {
             lprintf("page already mapped, shouldnt reach here\n");
         }
+        flush_page_entry(fault_VA);
         // Should I just assume if we try to write to this page then we j 
         // allocate page anyways or is there some case where the page 
         // initially anyways was supposed ot be read only

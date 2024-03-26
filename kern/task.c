@@ -82,7 +82,6 @@ static void *setup_main(void *stack_high, void *stack_low, char **argv, int argc
 
 void add_child(pcb_t **parent_list, pcb_t *child)
 {
-    assert(parent && child);
     if (*parent_list == NULL)
     {
         *parent_list = child;
