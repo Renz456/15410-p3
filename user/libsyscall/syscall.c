@@ -39,10 +39,10 @@ volatile static int placate_the_compiler;
 // 	return -1;
 // }
 
-void set_status(int status)
-{
-	return;
-}
+// void set_status(int status)
+// {
+// 	return;
+// }
 
 void vanish(void)
 {

@@ -47,7 +47,7 @@ void install_syscalls()
     create_idt_entry(readline_wrapper, USER_DPL, READLINE_INT);
     create_idt_entry(wait_wrapper, USER_DPL, WAIT_INT);
     create_idt_entry(task_vanish_wrapper, USER_DPL, TASK_VANISH_INT);
-    // create_idt_entry(set_status_wrapper, USER_DPL, SET_STATUS_INT);
+    create_idt_entry(set_status_wrapper, USER_DPL, SET_STATUS_INT);
 }
 
 /**

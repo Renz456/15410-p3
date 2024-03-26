@@ -21,7 +21,7 @@
 #include <inc/thread.h>
 
 // Reasonable buffer size given console height and width
-#define KB_BUFF_SIZE 256
+#define KB_BUFF_SIZE 1024
 
 char kb_buffer[KB_BUFF_SIZE];
 int current_buffer_index = 0;

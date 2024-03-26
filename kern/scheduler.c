@@ -20,6 +20,7 @@
 #include <inc/scheduler.h>
 #include <assert.h>
 #include <interrupt_defines.h>
+#include <inc/kern_constants.h>
 
 int context_enable = 0;
 
@@ -37,6 +38,8 @@ tcb_t *sleep_queue_head;
 tcb_t *sleep_queue_tail;
 tcb_t *wait_queue_head;
 tcb_t *wait_queue_tail;
+tcb_t *dead_queue_head;
+tcb_t *dead_queue_tail;
 // do I need a block queue???
 
 void initialise_scheduler()
@@ -48,6 +51,8 @@ void initialise_scheduler()
     sleep_queue_tail = NULL;
     wait_queue_head = NULL;
     wait_queue_tail = NULL;
+    dead_queue_head = NULL;
+    dead_queue_tail = NULL;
     // current_thread = NULL;
     return;
 }
@@ -72,6 +77,43 @@ void context_tickback(unsigned int tick)
     return;
 }
 
+/**
+ * @brief Adds tcb object from dead queue
+ *
+ * @param tcb : tcb to add to dead queue
+ */
+void add_to_dead_queue(tcb_t *tcb)
+{
+    assert(tcb);
+    tcb->next = NULL;
+    tcb->next = NULL;
+    insert_thread(&dead_queue_head, &dead_queue_tail, tcb);
+    lprintf("added thread %d to dead queue\n", tcb->tid);
+    assert(dead_queue_head);
+}
+
+/**
+ * @brief Pops first item off dead queue
+ *
+ * @return tcb_t*
+ */
+tcb_t *remove_from_dead_queue()
+{
+    tcb_t *tcb = dead_queue_head;
+    if (!tcb)
+        return NULL;
+    remove_thread(&dead_queue_head, &dead_queue_tail, tcb);
+    if (tcb)
+        lprintf("removed thread %d to dead queue\n", tcb->tid);
+    return tcb;
+}
+
+/**
+ * @brief
+ *
+ * @param tcb
+ * @param is_new_thread
+ */
 void add_to_run_queue(tcb_t *tcb, int is_new_thread)
 {
     tcb->next = NULL;
@@ -80,6 +122,23 @@ void add_to_run_queue(tcb_t *tcb, int is_new_thread)
     insert_thread(&run_queue_head, &run_queue_tail, tcb);
     lprintf("added thread %d to run queue\n", tcb->tid);
     assert(run_queue_head);
+}
+
+void try_reap_tcb()
+{
+    tcb_t *to_reap = remove_from_dead_queue();
+    if (to_reap)
+    {
+        tcb_t *cur_tcb = get_tcb();
+        if (cur_tcb->kernel_stack == to_reap->kernel_stack)
+        {
+            add_to_dead_queue(to_reap);
+            return;
+        }
+        sfree((void *)(((unsigned int)(to_reap->kernel_stack)) & PAGE_MASK), PAGE_SIZE);
+        free(to_reap);
+        lprintf("a tcb was freed!!\n");
+    }
 }
 
 int kernel_yield(int tid)

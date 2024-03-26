@@ -21,7 +21,7 @@
 #include <synchronization/cvar_kern.h>
 // #include <vm.h>
 
-#define TASK_PAGE_SIZE PAGE_SIZE
+#define TASK_PAGE_SIZE 2 * PAGE_SIZE
 int next_pid = 0;
 pcb_t *main_pcb;
 
@@ -131,7 +131,6 @@ void remove_child(pcb_t **parent_list, pcb_t *child)
 
 void kernel_task_vanish(int status)
 {
-    MAGIC_BREAK;
     /* this will definitely be a deadlock/race lol*/
     /* To avoid deadlock keep preemption by always locking child first?*/
     tcb_t *tcb = get_tcb();
@@ -153,6 +152,9 @@ void kernel_task_vanish(int status)
     if (!parent) // shouldn't happen for now
     {
         lprintf("null parent\n");
+        while (1)
+        {
+        }
         parent = main_pcb;
     }
 
@@ -172,6 +174,7 @@ void kernel_task_vanish(int status)
     lprintf("vanishing ourselves %d !!\n", tcb->tid);
     disable_interrupts();
     tcb->is_runnable = 0;
+    add_to_dead_queue(tcb);
     context_switch(-1);
 
     /* should not return back here */
@@ -198,6 +201,7 @@ void kernel_vanish()
 
     disable_interrupts();
     tcb->is_runnable = 0;
+    add_to_dead_queue(tcb);
     context_switch(-1);
 
     /* should not return back here */

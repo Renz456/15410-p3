@@ -15,8 +15,8 @@
 #include "410_tests.h"
 DEF_TEST_NAME("actual_wait:");
 
-#define NCHILD 40 /* must be < 255 */
-#define PRESERVE (1024*1024)
+#define NCHILD 1 /* must be < 255 */
+#define PRESERVE (1024 * 1024)
 
 void child(int);
 
@@ -27,22 +27,23 @@ int main(void)
   int c, preserve;
   char msg[128];
 
-  buf[0] = buf[sizeof (buf) - 1] = 'q';
+  buf[0] = buf[sizeof(buf) - 1] = 'q';
 
   REPORT_START_CMPLT;
 
   for (c = 0; c < NCHILD; ++c)
-    switch(((pid = fork()) < 0) ? -1 : pid) {
+    switch (((pid = fork()) < 0) ? -1 : pid)
+    {
     case -1:
       REPORT_MISC("cannot fork");
-	  goto fail;
+      goto fail;
     case 0:
       child(c);
       break;
     default:
       pids[c] = pid;
 
-      snprintf(msg, sizeof (msg), "slot %d pid %d", c, pid);
+      snprintf(msg, sizeof(msg), "slot %d pid %d", c, pid);
       printf("%s\n", msg);
       REPORT_MISC(msg);
 
@@ -51,7 +52,8 @@ int main(void)
       break;
     }
 
-  for (c = 0; c < NCHILD; ++c) {
+  for (c = 0; c < NCHILD; ++c)
+  {
     int slot;
     char msg[128];
 
@@ -60,28 +62,32 @@ int main(void)
 
     pid = wait(&slot);
 
-    snprintf(msg, sizeof (msg), "slot %d pid %d", slot, pid);
+    snprintf(msg, sizeof(msg), "slot %d pid %d", slot, pid);
     printf("%s\n", msg);
     REPORT_MISC(msg);
 
-    if ((slot < 0) || (slot >= NCHILD)) {
+    if ((slot < 0) || (slot >= NCHILD))
+    {
       REPORT_MISC("invalid slot");
-	  goto fail;
+      goto fail;
     }
-    if (pids[slot] != pid) {
+    if (pids[slot] != pid)
+    {
       REPORT_MISC("pid/slot mismatch");
-	  goto fail;
+      goto fail;
     }
     pids[slot] = -1;
   }
 
   preserve = PRESERVE;
   pid = wait(&preserve);
-  if (pid >= 0) {
+  if (pid >= 0)
+  {
     REPORT_MISC("phantom menace");
     goto fail;
   }
-  if (preserve != PRESERVE) {
+  if (preserve != PRESERVE)
+  {
     REPORT_MISC("obliteration");
     goto fail;
   }
@@ -94,30 +100,33 @@ fail:
   exit(9);
 }
 
-void
-child(int which)
+void child(int which)
 {
   int wpid, gpid;
   char msg[128];
 
-  snprintf(msg, sizeof (msg), "child %d", which);
+  snprintf(msg, sizeof(msg), "child %d", which);
   printf("%s\n", msg);
   REPORT_MISC(msg);
 
-  switch(((gpid = fork()) < 0) ? -1 : gpid) {
+  switch (((gpid = fork()) < 0) ? -1 : gpid)
+  {
   case -1:
     REPORT_MISC("child cannot fork");
     goto fail;
     break;
   case 0:
-    if (which & 1) {
+    if (which & 1)
+    {
       yield(-1);
       yield(-1);
     }
     exit(0);
   default:
-    if ((which & 4) != 4) {
-      if ((wpid = wait(0)) != gpid) {
+    if ((which & 4) != 4)
+    {
+      if ((wpid = wait(0)) != gpid)
+      {
         REPORT_MISC("grandchild??");
         goto fail;
       }

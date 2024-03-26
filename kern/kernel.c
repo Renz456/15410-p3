@@ -32,7 +32,7 @@
 #include <inc/scheduler.h>
 #include <inc/kern_constants.h>
 
-#define STARTING_FILE "idle"
+#define STARTING_FILE "shell"
 #define IDLE_FILE "idle"
 
 volatile static int __kernel_all_done = 0;

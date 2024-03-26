@@ -20,6 +20,7 @@
 #include <elf_410.h>
 #include <simics.h>
 #include <inc/vm.h>
+#include <inc/kern_constants.h>
 
 /* --- Local function prototypes --- */
 
@@ -55,7 +56,19 @@ int getbytes(const char *filename, int offset, int size, char *buf)
   return size;
 }
 
-/*@}*/
+int allocate_user_pages(unsigned long start, unsigned int len)
+{
+  int retval = 0;
+  for (int offset = 0; offset < len; offset += PAGE_SIZE)
+  {
+    int check = align_pages((void *)(start + offset), PAGE_SIZE);
+    if (check < -1)
+      return check;
+    else if (check < 0)
+      retval = check;
+  }
+  return retval;
+}
 
 int init_address_space(const char *filename)
 {
@@ -76,7 +89,7 @@ int init_address_space(const char *filename)
 
   lprintf("check text start %p\n", (void *)se_hdr.e_txtstart);
 
-  check_align = align_pages((void *)se_hdr.e_txtstart, se_hdr.e_txtlen);
+  check_align = allocate_user_pages(se_hdr.e_txtstart, se_hdr.e_txtlen);
   if (check_align < -1)
     lprintf("App text pages failed!!\n");
 
@@ -84,7 +97,7 @@ int init_address_space(const char *filename)
     lprintf("app text get bytes failed\n");
 
   // if ((void *)se_hdr.e_datstart)
-  check_align = align_pages((void *)se_hdr.e_datstart, se_hdr.e_datlen);
+  check_align = allocate_user_pages(se_hdr.e_datstart, se_hdr.e_datlen);
   if (check_align < -1)
     lprintf("App data pages failed!!\n");
   // if ((void *)se_hdr.e_datstart)
@@ -93,7 +106,7 @@ int init_address_space(const char *filename)
     lprintf("app data get bytes failed\n");
 
   // if ((void *)se_hdr.e_rodatstart)
-  check_align = align_pages((void *)se_hdr.e_rodatstart, se_hdr.e_rodatlen);
+  check_align = allocate_user_pages(se_hdr.e_rodatstart, se_hdr.e_rodatlen);
   if (check_align < -1)
     lprintf("App rodata pages failed!!\n");
   // if ((void *)se_hdr.e_rodatstart)
@@ -101,7 +114,8 @@ int init_address_space(const char *filename)
   if (getbytes(se_hdr.e_fname, se_hdr.e_rodatoff, se_hdr.e_rodatlen, (char *)se_hdr.e_rodatstart) < 0)
     lprintf("app rodata get bytes failed\n");
 
-  check_align = align_pages((void *)se_hdr.e_bssstart, se_hdr.e_bsslen);
+  check_align = allocate_user_pages(se_hdr.e_bssstart, se_hdr.e_bsslen);
+  lprintf("check bss %lx %lx\n", se_hdr.e_bssstart, se_hdr.e_bsslen);
   if (check_align < -1)
     lprintf("App bss pages failed!!\n");
 

@@ -35,6 +35,7 @@ void timer_interupt_handler()
     outb(INT_CTL_PORT, INT_ACK_CURRENT); // THERER IS A BUG HERE!!
     if (num_ticks % 100 == 0)
     {
+        try_reap_tcb();
         lprintf("A second has passed in thread %d!\n", get_tcb()->tid);
         // tickback(num_ticks);
         context_switch(-1);

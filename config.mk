@@ -104,7 +104,8 @@ UPDATE_METHOD = afs
 # directory.
 #
 410TESTS = getpid_test1 ck1 loader_test1 loader_test2 fork_test1 new_pages \
-		   print_basic readline_basic wait_getpid fork_wait fork_wait_bomb
+		   print_basic readline_basic wait_getpid fork_wait fork_wait_bomb \
+		   actual_wait shell
 		   
 
 ###########################################################################
@@ -148,7 +149,7 @@ THREAD_OBJS = malloc.o panic.o
 # Object files for your syscall wrappers
 ###########################################################################
 SYSCALL_OBJS = syscall.o gettid.o new_pages.o fork.o exec.o new_pages.o halt.o \
-				print.o readline.o wait.o get_ticks.o task_vanish.o
+				print.o readline.o wait.o get_ticks.o task_vanish.o set_status.o
 
 
 ###########################################################################
@@ -172,7 +173,8 @@ KERNEL_OBJS = console.o kernel.o loader.o malloc_wrappers.o interrupts/fault_asm
 			  syscall_wrappers_asm/fork_wrapper.o task_sys.o memory/hash_helper.o synchronization/list_helper.o synchronization/mutex_kern.o \
 			  syscall_wrappers_asm/halt_wrapper.o syscall_wrappers_asm/exec_wrapper.o syscall_wrappers_asm/new_pages_wrapper.o \
 			  syscall_wrappers_asm/print_wrapper.o synchronization/cvar_kern.o hardware/keyboard.o \
-			  syscall_wrappers_asm/readline_wrapper.o syscall_wrappers_asm/wait_wrapper.o syscall_wrappers_asm/task_vanish_wrapper.o
+			  syscall_wrappers_asm/readline_wrapper.o syscall_wrappers_asm/wait_wrapper.o syscall_wrappers_asm/task_vanish_wrapper.o \
+			  syscall_wrappers_asm/set_status_wrapper.o
 
 
 ###########################################################################
