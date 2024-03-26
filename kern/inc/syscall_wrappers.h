@@ -24,5 +24,6 @@ void print_wrapper(void);
 void readline_wrapper(void);
 void wait_wrapper(void);
 void task_vanish_wrapper(void);
+void set_status_wrapper(void);
 
 #endif /* _SYSCALL_WRAP_H */

@@ -130,3 +130,8 @@ int kernel_gettid()
     tcb_t *tcb = get_tcb();
     return tcb->tid;
 }
+
+int kernel_swexn(void *esp3, swexn_handler_t eip, void *arg, ureg_t *newureg)
+{
+    return 0;
+}

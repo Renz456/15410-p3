@@ -29,5 +29,7 @@ typedef struct gen_reg
 } gen_reg_t;
 
 int kernel_fork(gen_reg_t *regs);
+int kernel_wait(int *status_ptr);
+void kernel_set_status(int status);
 
 #endif /* _TASK_SYS_H */

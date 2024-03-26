@@ -1,5 +1,5 @@
 /**
- * @file get_ticks_wrapper.S
+ * @file set_status_wrapper.S
  * @author Rene Ravanan (rravanan)
  *         Abhinav Gupta (abhinav6)
  * @brief 
@@ -9,21 +9,19 @@
  */
 
 #include <seg.h>
-; #include <inc/task_sys.h>
-; #include <inc/get_ticks_wrapper.h>
+#include <simics.h>
 
 
 /* should this become a regular syscall wrapper?? */
 
-.global get_ticks_wrapper
+.global set_status_wrapper
 
-get_ticks_wrapper:
+set_status_wrapper:
     pushl %ebp
     mov   %esp, %ebp     
     sub   $4, %esp       /* Make space for return value */
 
     pusha
-
     pushl %ds           /* Code segments are saved automatically*/
     pushl %es           /* Data segment and general purpose registers need to be manually saved*/
     pushl %fs 
@@ -35,10 +33,16 @@ get_ticks_wrapper:
     movl %eax, %fs
     movl %eax, %gs
 
-    call kernel_get_ticks
+    movl (%esi), %eax
+    pushl %eax
+
+    call kernel_set_status
     
-    movl  %eax,-4(%ebp)  /* store result in the space that was saved earlier */
+    mov  %eax,-4(%ebp) 
+    /* movl  %eax,52(%esp) */ /* store result on stack */
     
+    popl %eax   /* Clear input args */
+
     popl %gs
     popl %fs 
     popl %es 

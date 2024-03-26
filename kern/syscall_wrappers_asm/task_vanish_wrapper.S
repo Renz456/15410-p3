@@ -42,7 +42,6 @@ task_vanish_wrapper:
     /* movl  %eax,52(%esp) */ /* store result on stack */
     
     popl %eax   /* Clear input args */
-    popl %eax 
 
     popl %gs
     popl %fs 

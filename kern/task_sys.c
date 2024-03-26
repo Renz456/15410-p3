@@ -190,6 +190,7 @@ int kernel_wait(int *status_ptr)
   /* temp free stuffs */
   sfree(reaped_child->page_directory, PAGE_SIZE);
   int child_pid = reaped_child->pid;
+  // TODO check is this pointer is legit (i.e. mapped lol)
   if (status_ptr != NULL)
   {
     *status_ptr = reaped_child->status;
@@ -197,4 +198,11 @@ int kernel_wait(int *status_ptr)
   mutex_unlock(&pcb->pcb_mp);
   // MAGIC_BREAK;
   return child_pid;
+}
+
+void kernel_set_status(int status)
+{
+  tcb_t *tcb = get_tcb();
+  pcb_t *pcb = tcb->pcb;
+  pcb->status = status;
 }

@@ -117,11 +117,11 @@ int set_cursor_pos(int row, int col)
 	return -1;
 }
 
-void halt(void)
-{
-	while (1)
-		++placate_the_compiler;
-}
+// void halt(void)
+// {
+// 	while (1)
+// 		++placate_the_compiler;
+// }
 
 int readfile(char *filename, char *buf, int count, int offset)
 {
@@ -131,6 +131,7 @@ int readfile(char *filename, char *buf, int count, int offset)
 // void task_vanish(int status)
 // {
 // 	lprintf("task vanish protoype");
+// 	// MAGIC_BREAK;
 // 	while (1)
 // 	{
 // 		// lprintf("still here?\n");

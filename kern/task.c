@@ -131,6 +131,7 @@ void remove_child(pcb_t **parent_list, pcb_t *child)
 
 void kernel_task_vanish(int status)
 {
+    MAGIC_BREAK;
     /* this will definitely be a deadlock/race lol*/
     /* To avoid deadlock keep preemption by always locking child first?*/
     tcb_t *tcb = get_tcb();
@@ -166,6 +167,7 @@ void kernel_task_vanish(int status)
     mutex_unlock(&pcb->pcb_mp);
 
     /* clear user vm here? */
+
     cond_signal(&parent->pcb_cv);
     lprintf("vanishing ourselves %d !!\n", tcb->tid);
     disable_interrupts();
@@ -186,7 +188,7 @@ void kernel_vanish()
     if (pcb->num_threads == 0)
     {
         /* basically task vanish */
-        kernel_task_vanish(1);
+        kernel_task_vanish(pcb->status);
     }
 
     /* any vm clearing? */

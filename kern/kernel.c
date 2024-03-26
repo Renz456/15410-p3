@@ -32,7 +32,7 @@
 #include <inc/scheduler.h>
 #include <inc/kern_constants.h>
 
-#define STARTING_FILE "fork_wait_bomb"
+#define STARTING_FILE "idle"
 #define IDLE_FILE "idle"
 
 volatile static int __kernel_all_done = 0;
