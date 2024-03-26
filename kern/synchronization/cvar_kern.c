@@ -98,6 +98,7 @@ void cond_signal(cond_t *cv)
         waiter_node->reject = 1;
         mutex_unlock(&cv->mutex);
         disable_interrupts();
+        // lprintf("")
         kernel_make_runnable(waiter_node->tid);
         enable_interrupts();
     }

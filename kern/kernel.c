@@ -32,7 +32,7 @@
 #include <inc/scheduler.h>
 #include <inc/kern_constants.h>
 
-#define STARTING_FILE "readline_basic"
+#define STARTING_FILE "fork_wait_bomb"
 #define IDLE_FILE "idle"
 
 volatile static int __kernel_all_done = 0;
@@ -100,23 +100,24 @@ int kernel_main(mbinfo_t *mbinfo, int argc, char **argv, char **envp)
     void *eip = (void *)se_hdr.e_entry;
 
     lprintf("Entry addr %lx\n", se_hdr.e_entry);
-
+    lprintf("lol wut %lx\n", se_hdr.e_datstart);
     // pde *idle_pd = malloc(sizeof(pde));
 
     set_cr3((unsigned int)idle_pd);
     pcb_t *idle_pcb = create_pcb(idle_pd);
     void *idle_stack = init_task(idle_pcb, NULL, 0);
     tcb_t *idle_tcb = create_tcb(idle_pcb);
-    init_address_space(IDLE_FILE);
     simple_elf_t se_hdr_idle;
     if (elf_load_helper(&se_hdr_idle, IDLE_FILE) < 0)
     {
         lprintf("this should not happen\n");
         return -1;
     }
+    lprintf("lol wut %lx\n", se_hdr_idle.e_datstart);
+    init_address_space(IDLE_FILE);
     // se_hdr_idle.e_entry = 0x1000000; // mmmmmm why da idle loader wrong?
     prepare_thread(idle_tcb, idle_stack, (void *)se_hdr_idle.e_entry);
-    MAGIC_BREAK;
+    // MAGIC_BREAK;
     set_cr3((uint32_t)page_directory);
 
     run_thread(tcb, stack, eip);

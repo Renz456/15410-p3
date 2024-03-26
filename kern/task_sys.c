@@ -21,6 +21,7 @@
 #include <simics.h>
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
 #include <inc/asm_helpers.h>
 #include <synchronization/mutex_kern.h>
 #include <synchronization/list_helper.h>
@@ -82,6 +83,7 @@ int kernel_fork(gen_reg_t *regs)
   void *new_pd = clone_page_directory(cur_pd);
   lprintf("Parent successful clone\n");
   pcb_t *new_pcb = create_pcb(new_pd);
+  new_pcb->parent = cur_pcb;
   // void *stack = init_task(new_pcb); // I should not need to do this
   tcb_t *new_tcb = create_tcb(new_pcb); // I need this since there's a new kernel stack
 
@@ -179,14 +181,20 @@ int kernel_wait(int *status_ptr)
   mutex_lock(tcb->tid, &pcb->pcb_mp);
   if (pcb->zombie_list == NULL)
     cond_wait(&pcb->pcb_cv, &pcb->pcb_mp);
+
   pcb_t *reaped_child = pcb->zombie_list;
   assert(reaped_child->exited);
   remove_child(&pcb->zombie_list, reaped_child);
   /* will need to have some clean up of vm etc. here */
   // destroy vm
+  /* temp free stuffs */
+  sfree(reaped_child->page_directory, PAGE_SIZE);
   int child_pid = reaped_child->pid;
   if (status_ptr != NULL)
+  {
     *status_ptr = reaped_child->status;
+  }
   mutex_unlock(&pcb->pcb_mp);
+  // MAGIC_BREAK;
   return child_pid;
 }

@@ -33,7 +33,7 @@ void timer_interupt_handler()
     // MAGIC_BREAK;
 
     outb(INT_CTL_PORT, INT_ACK_CURRENT); // THERER IS A BUG HERE!!
-    if (num_ticks % 500 == 0)
+    if (num_ticks % 100 == 0)
     {
         lprintf("A second has passed in thread %d!\n", get_tcb()->tid);
         // tickback(num_ticks);
@@ -53,6 +53,10 @@ void set_tickback(void (*callback_fn)(unsigned int))
     tickback = callback_fn;
 }
 
+int kernel_get_ticks()
+{
+    return num_ticks;
+}
 /*
 00000000 <main>:
    0:   55                      push   %ebp

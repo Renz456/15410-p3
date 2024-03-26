@@ -209,7 +209,11 @@ void *get_frame_addr()
 int new_pages(void *addr, int len)
 {
 
-    assert(addr != NULL);
+    // assert(addr != NULL);
+    if (addr == NULL)
+    {
+        return -9;
+    }
     lprintf("new page addr %p %d\n", addr, check_present(addr));
     if (len % PAGE_SIZE != 0)
     {

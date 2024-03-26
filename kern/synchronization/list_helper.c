@@ -1,6 +1,17 @@
+/**
+ * @file list_helper.c
+ * @author Rene Ravanan (rravanan)
+ *         Abhinav Gupta (abhinav6)
+ * @brief
+ *
+ * @bug
+ *
+ */
+
 #include <stdlib.h>
 #include <synchronization/list_helper.h>
 #include <assert.h>
+#include <simics.h>
 
 int queue_init(mut_queue_t *queue)
 {
@@ -30,6 +41,7 @@ int add_queue(mut_node_t *new_node, mut_queue_t *queue)
     }
     else
     {
+        lprintf("check queue size %d\n", queue->size);
         assert(queue->size > 0);
         new_node->prev = queue->tail;
         queue->tail->next = new_node;

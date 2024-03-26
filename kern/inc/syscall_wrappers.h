@@ -22,5 +22,7 @@ void halt_wrapper(void);
 void new_pages_wrapper(void);
 void print_wrapper(void);
 void readline_wrapper(void);
+void wait_wrapper(void);
+void task_vanish_wrapper(void);
 
 #endif /* _SYSCALL_WRAP_H */

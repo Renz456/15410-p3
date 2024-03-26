@@ -57,10 +57,10 @@ void vanish(void)
 		++placate_the_compiler;
 }
 
-int wait(int *status_ptr)
-{
-	return -1;
-}
+// int wait(int *status_ptr)
+// {
+// 	return -1;
+// }
 
 int yield(int pid)
 {
@@ -128,27 +128,14 @@ int readfile(char *filename, char *buf, int count, int offset)
 	return -1;
 }
 
-void task_vanish(int status)
-{
-	lprintf("task vanish protoype");
-	// tcb_t *tcb = get_tcb();
-	// pcb_t *pcb = tcb->pcb;
-	// mutex_lock(tcb->tid, &pcb->pcb_mp);
-	// if (pcb->parent)
-	// {
-	// 	pcb_t *parent = pcb->parent;
-	// 	mutex_lock(tcb->tid, &parent->pcb_mp);
-	// 	remove_child(&parent->child_list, pcb);
-	// 	pcb->exited = 1; // this will be status later
-	// 	add_child(&parent->zombie_list, pcb);
-	// 	mutex_unlock(&parent->pcb_mp);
-	// }
-	// mutex_unlock(&pcb->pcb_mp);
-	while (1)
-	{
-		// lprintf("still here?\n");
-	}
-}
+// void task_vanish(int status)
+// {
+// 	lprintf("task vanish protoype");
+// 	while (1)
+// 	{
+// 		// lprintf("still here?\n");
+// 	}
+// }
 
 // int new_pages(void *addr, int len)
 // {
@@ -160,10 +147,10 @@ void task_vanish(int status)
 // 	return -1;
 // }
 
-unsigned int get_ticks(void)
-{
-	return 1;
-}
+// unsigned int get_ticks(void)
+// {
+// 	return 1;
+// }
 
 void misbehave(int mode)
 {

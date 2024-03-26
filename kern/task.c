@@ -146,23 +146,28 @@ void kernel_task_vanish(int status)
     }
 
     /* TODO add zombies to main pcb too */
-
+    lprintf("ceck this %d %p\n", pcb->pcb_mp.wait_queue.size, &pcb->pcb_mp);
     mutex_lock(tcb->tid, &pcb->pcb_mp);
     pcb_t *parent = pcb->parent;
     if (!parent) // shouldn't happen for now
+    {
+        lprintf("null parent\n");
         parent = main_pcb;
+    }
 
     mutex_lock(tcb->tid, &parent->pcb_mp);
     remove_child(&parent->child_list, pcb);
     pcb->exited = 1; // this will be status later
     pcb->status = status;
+    lprintf("zombie status: %d\n", status);
     add_child(&parent->zombie_list, pcb);
 
     mutex_unlock(&parent->pcb_mp);
     mutex_unlock(&pcb->pcb_mp);
 
     /* clear user vm here? */
-
+    cond_signal(&parent->pcb_cv);
+    lprintf("vanishing ourselves %d !!\n", tcb->tid);
     disable_interrupts();
     tcb->is_runnable = 0;
     context_switch(-1);

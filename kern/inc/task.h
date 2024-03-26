@@ -50,5 +50,7 @@ pcb_t *create_pcb(void *page_directory);
 void *init_task(pcb_t *pcb, char **argv, int argc);
 void add_child(pcb_t **parent_list, pcb_t *child);
 void remove_child(pcb_t **parent_list, pcb_t *child);
+void kernel_task_vanish(int status);
+void kernel_vanish();
 
 #endif /* _TASK_H */

@@ -24,4 +24,6 @@ void timer_interupt_handler(void);
  */
 void set_tickback(void (*callback_fn)(unsigned int));
 
+int kernel_get_ticks();
+
 #endif /* _TIMER_H */

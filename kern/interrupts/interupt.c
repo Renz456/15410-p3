@@ -45,7 +45,8 @@ void install_syscalls()
     create_idt_entry(new_pages_wrapper, USER_DPL, NEW_PAGES_INT);
     create_idt_entry(print_wrapper, USER_DPL, PRINT_INT);
     create_idt_entry(readline_wrapper, USER_DPL, READLINE_INT);
-    lprintf("readline %p\n", readline_wrapper);
+    create_idt_entry(wait_wrapper, USER_DPL, WAIT_INT);
+    create_idt_entry(task_vanish_wrapper, USER_DPL, TASK_VANISH_INT);
 }
 
 /**

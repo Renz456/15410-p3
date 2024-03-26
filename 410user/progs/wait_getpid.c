@@ -23,22 +23,28 @@ int main()
 
   pid = fork();
 
-  if (pid < 0) {
-    report_end(END_FAIL);
-    exit(-1);
-  }
-  
-  if (pid == 0) {
-    pid = gettid();
-    exit(pid);
-    report_end(END_FAIL);
-  }
-  if (wait(&status) != pid) {
+  if (pid < 0)
+  {
     report_end(END_FAIL);
     exit(-1);
   }
 
-  if (status != pid) {
+  if (pid == 0)
+  {
+    pid = gettid();
+    exit(pid);
+    report_end(END_FAIL);
+  }
+  if (wait(&status) != pid)
+  {
+    lprintf("first fail wait?\n");
+    report_end(END_FAIL);
+    exit(-1);
+  }
+
+  if (status != pid)
+  {
+    lprintf("second fail %d %d\n", status, pid);
     report_end(END_FAIL);
     exit(-1);
   }

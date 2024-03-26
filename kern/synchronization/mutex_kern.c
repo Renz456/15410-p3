@@ -22,6 +22,8 @@ int mutex_init(mutex_t *mp)
 int mutex_lock(int tid, mutex_t *mutex)
 {
     assert(mutex != NULL);
+    lprintf("check pre lock %d %p\n", mutex->wait_queue.size, mutex);
+
     // Stop context switching
     disable_contexts(); // or interupts??
     disable_interrupts();
@@ -43,6 +45,7 @@ int mutex_lock(int tid, mutex_t *mutex)
             .prev = NULL,
         };
 
+        lprintf("check pre queue %d %p\n", mutex->wait_queue.size, mutex);
         add_queue(&node, &mutex->wait_queue);
 
         enable_contexts();
